@@ -1,0 +1,25 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "pdc_struct"
+version = "0.1.0"
+authors = [
+  { name="Jonathan Baker", email="jon@boxcake.net" },
+]
+description = "A Pydantic extension for struct-compatible serialization"
+readme = "README.md"
+requires-python = ">=3.10"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "pydantic>=2.0.0",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/yourusername/pdc_struct"
+"Bug Tracker" = "https://github.com/yourusername/pdc_struct/issues"
