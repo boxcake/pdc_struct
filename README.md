@@ -17,7 +17,7 @@ PDC Struct is a Pydantic extension that enables binary serialization of Pydantic
 ## Installation
 
 ```bash
-pip install git+https://github.com/yourusername/pdc_struct.git
+pip install git+hhttps://github.com/boxcake/pdc_struct.git
 ```
 
 **Requirements**:
@@ -123,7 +123,27 @@ received = ARPPacket.from_bytes(packet_bytes)
 print(f"ARP {received.operation.name} from {received.sender_proto_addr}")
 ```
 
-This example demonstrates PDC Struct's ability to handle real network protocols with:
+```shell
+> python3 decode_arp.py 
+
+Equivalent struct format string:  >HHBBH6s4s6s4s
+
+Listening for ARP packets...
+
+ARP Packet Received:
+            Operation : REQUEST
+            Source IP : 192.168.1.202
+            SourceMac : d623cbd568a9
+            Query IP  : 192.168.1.99
+            
+ARP Packet Received:
+            Operation : REQUEST
+            Source IP : 192.168.1.202
+            SourceMac : d623cbd568a9
+            Query IP  : 192.168.1.99
+            
+```
+This example demonstrates the ability to handle real network protocols with:
 - Fixed-width integers with specific sizes (uint8, uint16)
 - Network byte order (big-endian)
 - MAC addresses as fixed-length bytes
@@ -158,6 +178,9 @@ binary_data = sensor.to_bytes()
 recovered = SensorData.from_bytes(binary_data)
 print(f"Temperature: {recovered.temperature}°C")
 ```
+
+The repo also contains an example interprocess communication using unix sockets, with a python app encoding data, and the data being decoded by a simple binary written in C
+[Code here](examples/py-c-interprocess/README.md)
 
 ## Operating Modes
 
@@ -254,7 +277,9 @@ PDC Struct supports a variety of Python types with C-compatible struct packing:
 ### Fixed-Width Types
 
 ```python
+from pdc_struct import StructModel
 from pdc_struct.c_types import Int8, UInt8, Int16, UInt16
+from pydantic import Field
 
 class SensorReading(StructModel):
     sensor_id: UInt8 = Field(description="Sensor ID (0-255)")
