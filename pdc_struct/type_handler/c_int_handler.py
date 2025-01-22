@@ -4,7 +4,6 @@ from typing import Optional
 
 from pydantic import Field
 
-from pdc_struct import StructConfig
 from .meta import TypeHandler
 from ..c_types import Int8, UInt8, Int16, UInt16
 
@@ -26,7 +25,7 @@ class FixedIntHandler(TypeHandler):
     def pack(cls,
              value,
              field: Optional[Field]=None,
-             struct_config: Optional[StructConfig] = None
+             struct_config: Optional['StructConfig'] = None     # noqa
              ) -> int:
         """Pack fixed-width integer.
 

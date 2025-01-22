@@ -3,7 +3,6 @@ from typing import Optional
 
 from pydantic import Field
 
-from pdc_struct import StructConfig
 from .meta import TypeHandler
 
 
@@ -22,7 +21,7 @@ class BoolHandler(TypeHandler):
     def pack(cls,
              value: bool,
              field: Optional[Field]=None,
-             struct_config: Optional[StructConfig] = None
+             struct_config: Optional['StructConfig'] = None
              ) -> bool:
         return value
 

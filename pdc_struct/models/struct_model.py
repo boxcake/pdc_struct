@@ -5,12 +5,12 @@ from typing import Optional, ClassVar, Type, Dict, Any
 from pydantic import BaseModel
 import struct
 
-from .type_handler import TypeHandler, TypeHandlerMeta
-from .types import T, unwrap_optional_type, is_optional_type
-from .config import StructConfig
-from .exc import StructPackError, StructUnpackError
-from .enums import ByteOrder, StructVersion, HeaderFlags, StructMode
-from .utils import create_field_bitmap, parse_field_bitmap
+from ..type_handler import TypeHandler, TypeHandlerMeta
+from ..types import T, unwrap_optional_type, is_optional_type
+from .struct_config import StructConfig
+from ..exc import StructPackError, StructUnpackError
+from ..enums import ByteOrder, StructVersion, HeaderFlags, StructMode
+from ..utils import create_field_bitmap, parse_field_bitmap
 
 
 class StructModel(BaseModel):

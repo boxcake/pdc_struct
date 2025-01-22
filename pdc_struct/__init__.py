@@ -7,9 +7,12 @@ except ImportError:
 
 from .exc import StructPackError, StructUnpackError
 from .enums import StructVersion, ByteOrder, HeaderFlags, StructMode
-from .config import StructConfig
-from .models import StructModel
-
+from .models import (
+    StructConfig,
+    StructModel,
+    BitFieldStruct,
+    Bit,
+)
 
 class PydanticVersionError(Exception):
     """Raised when an incompatible version of pydantic is installed"""
@@ -44,4 +47,6 @@ __all__ = [
     'StructPackError',
     'StructUnpackError',
     'PydanticVersionError',
+    'Bit',
+    'BitFieldStruct',
 ]

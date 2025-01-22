@@ -5,7 +5,6 @@ Sends sensor readings to a C program over a Unix domain socket.
 
 import socket
 import time
-from typing import Optional
 from pydantic import Field
 from pdc_struct import StructModel, StructConfig, StructMode, ByteOrder
 from pdc_struct.c_types import UInt16

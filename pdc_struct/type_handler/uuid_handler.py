@@ -3,7 +3,6 @@ from uuid import UUID
 from typing import Optional, Union
 from pydantic import Field
 
-from pdc_struct import StructConfig
 from .meta import TypeHandler
 from pdc_struct.enums import ByteOrder
 
@@ -24,7 +23,7 @@ class UUIDHandler(TypeHandler):
             cls,
             value: UUID,
             field: Optional[Field] = None,
-            struct_config: Optional[StructConfig] = None
+            struct_config: Optional['StructConfig'] = None      # noqa
     ) -> Union[bytes, None]:
         """Pack UUID to bytes with proper endianness."""
         if value is None:

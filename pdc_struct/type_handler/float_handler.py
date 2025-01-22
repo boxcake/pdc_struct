@@ -3,7 +3,6 @@ from typing import Optional
 
 from pydantic import Field
 
-from pdc_struct import StructConfig
 from .meta import TypeHandler
 
 
@@ -25,7 +24,7 @@ class FloatHandler(TypeHandler):
     def pack(cls,
              value: float,
              field: Optional[Field]=None,
-             struct_config: Optional[StructConfig] = None
+             struct_config: Optional['StructConfig'] = None
              ) -> float:
         return value
 

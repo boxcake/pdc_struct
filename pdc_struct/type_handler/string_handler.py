@@ -2,7 +2,7 @@
 from typing import Optional, Union
 from pydantic import Field
 
-from pdc_struct import StructMode, StructConfig
+from pdc_struct.enums import StructMode
 from .meta import TypeHandler
 
 
@@ -26,7 +26,7 @@ class StringHandler(TypeHandler):
     def pack(cls,
              value: str,
              field: Optional[Field] = None,
-             struct_config: Optional[StructConfig] = None
+             struct_config: Optional['StructConfig'] = None
              ) -> bytes:
         """Pack string to bytes.
 
