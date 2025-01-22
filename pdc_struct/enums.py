@@ -1,7 +1,7 @@
 # enums.py
 """Enums for pdc_struct"""
 
-from enum import Enum, IntFlag
+from enum import Enum, IntFlag, IntEnum, auto
 
 
 class StructVersion(Enum):
@@ -26,3 +26,9 @@ class HeaderFlags(IntFlag):
     BIG_ENDIAN = 0x01
     HAS_OPTIONAL_FIELDS = 0x02
     # Bits 2-7 reserved for future use
+
+
+class BitOrder(IntEnum):
+    """Bit ordering for BitFieldStruct."""
+    LSB_FIRST = auto()  # Least significant bit first
+    MSB_FIRST = auto()  # Most significant bit first

@@ -5,10 +5,7 @@ Provides type handler registration and lookup functionality.
 """
 from typing import Any, Dict, Type, Optional
 from abc import ABC, ABCMeta, abstractmethod
-
 from pydantic import Field
-
-from pdc_struct import StructConfig
 
 
 class TypeHandlerMeta(ABCMeta):
@@ -68,7 +65,6 @@ class TypeHandlerMeta(ABCMeta):
             mcs._handler_registry[python_type] = handler_cls
 
 
-
 class TypeHandler(ABC, metaclass=TypeHandlerMeta):
     """Base class for all PDC struct type handlers.
 
@@ -97,7 +93,7 @@ class TypeHandler(ABC, metaclass=TypeHandlerMeta):
     def pack(cls,
              value: Any,
              field: Optional[Field],
-             struct_config: Optional[StructConfig] = None
+             struct_config: Optional['StructConfig'] = None # noqa - ignore StructConfig to avoid a circular import
              ) -> Any:
         """Pack a value for struct.pack."""
         raise NotImplementedError
@@ -118,7 +114,7 @@ class TypeHandler(ABC, metaclass=TypeHandlerMeta):
 
     @classmethod
     def validate_field(cls, field) -> None:
-        """Validate and setup a field at model creation time.
+        """Validate and set up a field at model creation time.
 
         For fields that require a length (like str and bytes), validates
         that the length is specified and stores it in the field metadata.

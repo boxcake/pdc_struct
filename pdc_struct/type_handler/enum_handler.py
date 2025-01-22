@@ -3,7 +3,6 @@ from enum import Enum, IntEnum, StrEnum
 from typing import Optional, Union
 from pydantic import Field
 
-from pdc_struct import StructConfig
 from .meta import TypeHandler
 
 
@@ -51,7 +50,7 @@ class EnumHandler(TypeHandler):
     def pack(cls,
              value: Enum,
              field: Optional[Field]=None,
-             struct_config: Optional[StructConfig] = None
+             struct_config: Optional['StructConfig'] = None     # noqa
              ) -> Union[int, None]:
         """Pack enum value.
 

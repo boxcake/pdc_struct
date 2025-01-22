@@ -3,7 +3,6 @@ from typing import Optional
 
 from pydantic import Field
 
-from pdc_struct import StructConfig
 from .meta import TypeHandler
 
 
@@ -25,7 +24,7 @@ class IntHandler(TypeHandler):
     def pack(cls,
              value: int,
              field: Optional[Field]=None,
-             struct_config: Optional[StructConfig] = None
+             struct_config: Optional['StructConfig'] = None     # noqa
              ) -> int:
         return value
 

@@ -3,7 +3,6 @@ from ipaddress import IPv4Address, IPv6Address, ip_address
 from typing import Any, Optional
 from pydantic import Field
 
-from pdc_struct import StructConfig
 from .meta import TypeHandler
 
 
@@ -44,7 +43,7 @@ class IPAddressHandler(TypeHandler):
     def pack(cls,
              value: Any,
              field: Optional[Field] = None,
-             struct_config: Optional[StructConfig] = None
+             struct_config: Optional['StructConfig'] = None
              ) -> bytes:
         """Pack IP address to bytes.
 

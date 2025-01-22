@@ -1,10 +1,9 @@
 """Bytes type handler for PDC Struct."""
-import sys
-from typing import Optional
+from typing import Optional, Union
 
 from pydantic import Field
 
-from pdc_struct import StructConfig, ByteOrder
+from pdc_struct import ByteOrder
 from .meta import TypeHandler
 
 
@@ -26,7 +25,12 @@ class BytesHandler(TypeHandler):
         return f'{struct_length}s'
 
     @classmethod
-    def pack(cls, value: bytes, field: Optional[Field] = None, struct_config: Optional[StructConfig] = None) -> bytes:
+    def pack(
+            cls,
+            value: bytes,
+            field: Optional[Field] = None,
+            struct_config: Optional['StructConfig'] = None      # noqa
+    ) -> bytes:
         """Pack bytes/bytearray with proper endianness.
 
         Args:
@@ -53,7 +57,12 @@ class BytesHandler(TypeHandler):
         return value
 
     @classmethod
-    def unpack(cls, value: bytes, field: Optional[Field] = None, struct_config: Optional[StructConfig] = None) -> bytes:
+    def unpack(
+            cls,
+            value: bytes,
+            field: Optional[Field] = None,
+            struct_config: Optional['StructConfig'] = None  # noqa
+    ) -> Union[bytes, None]:
         """Unpack bytes with proper endianness.
 
         Args:
