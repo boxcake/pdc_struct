@@ -10,7 +10,7 @@ from .enums import StructVersion, ByteOrder, HeaderFlags, StructMode
 from .models import (
     StructConfig,
     StructModel,
-    BitFieldStruct,
+    BitFieldModel,
     Bit,
 )
 
@@ -48,5 +48,5 @@ __all__ = [
     'StructUnpackError',
     'PydanticVersionError',
     'Bit',
-    'BitFieldStruct',
+    'BitFieldModel',
 ]
