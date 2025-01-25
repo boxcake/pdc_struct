@@ -1,5 +1,6 @@
 """Config class for pdc_struct"""
 
+from sys import byteorder as system_byte_order
 from dataclasses import dataclass
 from typing import Dict, Any, Optional
 
@@ -20,7 +21,6 @@ class StructConfig:
         version: Protocol version (only used in DYNAMIC mode)
         byte_order: Byte order for struct packing
         bit_width: Number of bits for BitFieldStruct (8, 16, or 32)
-        bit_order: Bit ordering for BitFieldStruct
         metadata: Optional dictionary for custom metadata
 
     Notes:
@@ -36,14 +36,12 @@ class StructConfig:
 
         For BitFieldStruct:
         - bit_width must be 8, 16, or 32
-        - bit_order determines whether bits are counted from LSB or MSB
         - Only needed when using BitFieldStruct
     """
     mode: StructMode = StructMode.DYNAMIC
     version: StructVersion = StructVersion.V1
-    byte_order: ByteOrder = ByteOrder.LITTLE_ENDIAN
+    byte_order: ByteOrder = ByteOrder.LITTLE_ENDIAN if system_byte_order == "little" else ByteOrder.BIG_ENDIAN
     bit_width: Optional[int] = None
-    bit_order: BitOrder = BitOrder.LSB_FIRST
     metadata: Dict[str, Any] = None
 
     def __post_init__(self):

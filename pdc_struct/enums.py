@@ -13,6 +13,7 @@ class StructMode(Enum):
     C_COMPATIBLE = "c_compatible"  # Fixed size, no header, no optional fields
     DYNAMIC = "dynamic"           # Variable size, header present, optional fields supported
 
+
 class ByteOrder(Enum):
     """Byte order for struct packing"""
     LITTLE_ENDIAN = '<'

@@ -3,7 +3,7 @@ from typing import Optional, Union
 from pydantic import Field
 
 from .meta import TypeHandler
-from ..models.bit_field import BitFieldStruct
+from ..models.bit_field import BitFieldModel
 
 
 class BitFieldHandler(TypeHandler):
@@ -11,7 +11,7 @@ class BitFieldHandler(TypeHandler):
 
     @classmethod
     def handled_types(cls) -> list[type]:
-        return [BitFieldStruct]
+        return [BitFieldModel]
 
     @classmethod
     def get_struct_format(cls, field) -> str:
@@ -42,7 +42,7 @@ class BitFieldHandler(TypeHandler):
             field_type = field.annotation.__args__[0]
 
         # Verify it's a BitFieldStruct
-        if not issubclass(field_type, BitFieldStruct):
+        if not issubclass(field_type, BitFieldModel):
             raise ValueError(f"Type must be a BitFieldStruct, got {field_type}")
 
         # Create instance to validate bit definitions
@@ -53,9 +53,9 @@ class BitFieldHandler(TypeHandler):
 
     @classmethod
     def pack(cls,
-             value: BitFieldStruct,
+             value: BitFieldModel,
              field: Optional[Field] = None,
-             struct_config: Optional['StructConfig'] = None,    # noqa - Ignore StructConfig due to circular import
+             struct_config: Optional['StructConfig'] = None,  # noqa - Ignore StructConfig due to circular import
              ) -> Union[int, None]:
         """Pack BitFieldStruct to integer value."""
         if value is None:
@@ -63,7 +63,7 @@ class BitFieldHandler(TypeHandler):
         return value.raw_value
 
     @classmethod
-    def unpack(cls, value: int, field: Optional[Field] = None) -> Union[BitFieldStruct, None]:
+    def unpack(cls, value: int, field: Optional[Field] = None) -> Union[BitFieldModel, None]:
         """Unpack integer value to BitFieldStruct."""
         if value is None:
             return None
