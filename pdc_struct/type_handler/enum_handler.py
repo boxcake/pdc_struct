@@ -66,7 +66,11 @@ class EnumHandler(TypeHandler):
         return int(value.value)
 
     @classmethod
-    def unpack(cls, value: int, field: Optional[Field] = None) -> Union[Enum, None]:
+    def unpack(cls,
+               value: int,
+               field: Optional[Field] = None,
+               struct_config: Optional['StructConfig'] = None
+               ) -> Union[Enum, None]:
         """Unpack integer into enum member.
 
         Args:

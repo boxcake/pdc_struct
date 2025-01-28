@@ -29,5 +29,9 @@ class FloatHandler(TypeHandler):
         return value
 
     @classmethod
-    def unpack(cls, value: float, field: Optional[Field] = None) -> float:
+    def unpack(cls,
+               value: float,
+               field: Optional[Field] = None,
+               struct_config: Optional['StructConfig'] = None
+               ) -> float:
         return value

@@ -12,41 +12,33 @@ from pdc_struct.enums import (
 )
 
 
-@dataclass
 class StructConfig:
     """Configuration for struct packing/unpacking.
 
-    Args:
-        mode: StructMode determining C compatibility or dynamic Python mode
-        version: Protocol version (only used in DYNAMIC mode)
-        byte_order: Byte order for struct packing
-        bit_width: Number of bits for BitFieldStruct (8, 16, or 32)
-        metadata: Optional dictionary for custom metadata
+    Each model class gets its own independent configuration. Config values are set by
+    creating a new StructConfig in a class:
 
-    Notes:
-        In C_COMPATIBLE mode:
-        - No headers are included in the packed data
-        - Optional fields must have defaults
-        - Strings are fixed-length and null-terminated
-
-        In DYNAMIC mode:
-        - Headers are always included
-        - Optional fields are supported
-        - Strings are length-prefixed and variable length
-
-        For BitFieldStruct:
-        - bit_width must be 8, 16, or 32
-        - Only needed when using BitFieldStruct
+    class MyModel(BitFieldModel):
+        struct_config = StructConfig(
+            mode=StructMode.C_COMPATIBLE,
+            bit_width=8
+        )
     """
-    mode: StructMode = StructMode.DYNAMIC
-    version: StructVersion = StructVersion.V1
-    byte_order: ByteOrder = ByteOrder.LITTLE_ENDIAN if system_byte_order == "little" else ByteOrder.BIG_ENDIAN
-    bit_width: Optional[int] = None
-    metadata: Dict[str, Any] = None
-
-    def __post_init__(self):
-        if self.metadata is None:
-            self.metadata = {}
+    def __init__(
+        self,
+        mode: StructMode = StructMode.DYNAMIC,
+        version: StructVersion = StructVersion.V1,
+        byte_order: ByteOrder = ByteOrder.LITTLE_ENDIAN if system_byte_order == "little" else ByteOrder.BIG_ENDIAN,
+        bit_width: Optional[int] = None,
+        propagate_byte_order: bool = True,
+        metadata: Dict[str, Any] = None
+    ):
+        self.mode = mode
+        self.version = version
+        self.byte_order = byte_order
+        self.bit_width = bit_width
+        self.metadata = metadata or {}
+        self.propagate_byte_order = propagate_byte_order
 
         # Validate bit_width if provided
         if self.bit_width is not None and self.bit_width not in (8, 16, 32):
