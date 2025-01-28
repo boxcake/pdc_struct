@@ -1,5 +1,5 @@
 """ Handler for string packing/unpacking """
-from typing import Optional, Union
+from typing import Optional
 from pydantic import Field
 
 from pdc_struct.enums import StructMode
@@ -40,8 +40,6 @@ class StringHandler(TypeHandler):
             - Null terminated
             - Padded to full length
         """
-        if not isinstance(value, str):
-            return value
 
         # Encode string and remove any embedded null bytes
         encoded = value.encode('utf-8')
@@ -78,13 +76,9 @@ class StringHandler(TypeHandler):
 
     @classmethod
     def unpack(cls, value: bytes, field: Optional[Field] = None, struct_config: Optional['StructConfig'] = None) -> str:
-        print(f"Unpacking bytes: {value}")
-        if value is None:
-            return None
 
         # Check mode from struct_config
         is_c_compatible = struct_config and struct_config.mode == StructMode.C_COMPATIBLE
-        print(f"Is C_COMPATIBLE: {is_c_compatible}")
 
         if is_c_compatible:
             # Split at first null
@@ -94,5 +88,4 @@ class StringHandler(TypeHandler):
             value = value.rstrip(b'\0')
 
         result = value.decode('utf-8')
-        print(f"Unpacked result: '{result}'")
         return result

@@ -49,7 +49,7 @@ class StructModelHandler(TypeHandler):
             value: StructModel,
             field: Optional[Field] = None,
             struct_config: Optional['StructConfig'] = None
-    ) -> bytes:
+    ) -> Union[bytes, None]:
         """Pack another StructModel object as bytes"""
         if value is None:
             # Handle null case based on mode

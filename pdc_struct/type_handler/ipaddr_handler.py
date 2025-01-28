@@ -1,6 +1,6 @@
 """IP address type handler for PDC Struct."""
-from ipaddress import IPv4Address, IPv6Address, ip_address
-from typing import Any, Optional
+from ipaddress import IPv4Address, IPv6Address
+from typing import Any, Optional, Union
 from pydantic import Field
 
 from .meta import TypeHandler
@@ -44,7 +44,7 @@ class IPAddressHandler(TypeHandler):
              value: Any,
              field: Optional[Field] = None,
              struct_config: Optional['StructConfig'] = None
-             ) -> bytes:
+             ) -> Union[bytes, None]:
         """Pack IP address to bytes.
 
         Always uses network byte order (big endian) as per IP standard.
@@ -63,8 +63,6 @@ class IPAddressHandler(TypeHandler):
 
         Input bytes should be in network byte order (big endian).
         """
-        if value is None:
-            return None
 
         # Get the target type
         ip_type = field.annotation

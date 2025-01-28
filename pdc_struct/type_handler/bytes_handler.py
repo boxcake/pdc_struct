@@ -70,8 +70,6 @@ class BytesHandler(TypeHandler):
             field: Field information including length constraints
             struct_config: The model's struct configuration for byte order
         """
-        if value is None:
-            return None
 
         # If no config or native byte order, return as is
         if not struct_config or struct_config.byte_order == ByteOrder.NATIVE:

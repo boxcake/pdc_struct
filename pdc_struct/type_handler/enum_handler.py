@@ -83,8 +83,6 @@ class EnumHandler(TypeHandler):
         Raises:
             ValueError: If the value doesn't match any enum member
         """
-        if value is None:
-            return None
 
         if field is None:
             raise ValueError("Cannot unpack enum without field type information")
