@@ -1,8 +1,8 @@
 """BitField implementation for PDC Struct."""
 from sys import byteorder as system_byte_order
-from typing import Any, Dict, Set, ClassVar, Literal
+from typing import Dict, Set, ClassVar, Literal
 from dataclasses import dataclass
-from pydantic import BaseModel, PrivateAttr, Field
+from pydantic import BaseModel, Field
 from pydantic.fields import FieldInfo
 
 from pdc_struct import ByteOrder
@@ -201,9 +201,7 @@ class BitFieldModel(BaseModel):
         if not 0 <= value <= max_value:
             raise ValueError(f"Value {value} out of range for {self.struct_config.bit_width} bits")
 
-        model_fields = self.model_fields
         for name, bit_def in self._bit_definitions.items():
-            field = model_fields[name]
             if bit_def.is_bool:
                 value_to_set = bool(value & (1 << bit_def.start_bit))
             else:

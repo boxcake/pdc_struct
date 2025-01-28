@@ -42,8 +42,6 @@ class UUIDHandler(TypeHandler):
                struct_config: Optional['StructConfig'] = None
                ) -> Union[UUID, None]:
         """Unpack bytes into UUID with proper endianness."""
-        if value is None:
-            return None
 
         if not field or not hasattr(field, 'struct_config'):
             return UUID(bytes=value)  # Default to big endian

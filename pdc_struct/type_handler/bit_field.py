@@ -69,8 +69,6 @@ class BitFieldHandler(TypeHandler):
                struct_config: Optional['StructConfig'] = None
                ) -> Union[BitFieldModel, None]:
         """Unpack integer value to BitFieldStruct."""
-        if value is None:
-            return None
 
         # Get the BitFieldStruct class
         field_type = field.annotation

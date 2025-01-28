@@ -1,11 +1,9 @@
 """Config class for pdc_struct"""
 
 from sys import byteorder as system_byte_order
-from dataclasses import dataclass
 from typing import Dict, Any, Optional
 
 from pdc_struct.enums import (
-    BitOrder,
     StructVersion,
     ByteOrder,
     StructMode

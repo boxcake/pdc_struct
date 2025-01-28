@@ -209,7 +209,7 @@ class StructModel(BaseModel):
         if value is None:
             return None
 
-        field = cls.model_fields[field_name]
+        field = cls.model_fields[field_name]    # noqa - property is a dict
 
         # Create a temporary struct_config with the overridden byte_order if provided
         if byte_order is not None:
