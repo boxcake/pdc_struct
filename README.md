@@ -163,9 +163,9 @@ Designed for interoperability with C structs:
 Optimized for Python-to-Python communication:
 
 - Variable-length structures
-- Truly optional fields (no defaults required) 
-- Efficient bitmap field tracking
-- Version headers for compatibility
+  - Truly optional fields (no defaults required) 
+  - Efficient bitmap field tracking
+  - Version headers for compatibility
 
 ## Type System
 
@@ -191,7 +191,7 @@ Fixed-width integer types are also available:
 PDC Struct provides specific exceptions:
 
 - `StructPackError`: Serialization errors
-- `StructUnpackError`: Deserialization errors
+  - `StructUnpackError`: Deserialization errors
 
 ## Contributing
 

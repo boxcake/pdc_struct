@@ -4,7 +4,6 @@ from .meta import TypeHandler, TypeHandlerMeta
 from .bit_field import BitFieldHandler
 from .bool_handler import BoolHandler
 from .bytes_handler import BytesHandler
-from .c_int_handler import FixedIntHandler
 from .enum_handler import EnumHandler
 from .float_handler import FloatHandler
 from .int_handler import IntHandler
@@ -18,7 +17,6 @@ __all__ = [
     'BoolHandler',
     'BytesHandler',
     'EnumHandler',
-    'FixedIntHandler',
     'FloatHandler',
     'IntHandler',
     'IPAddressHandler',

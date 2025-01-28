@@ -83,6 +83,16 @@ class TypeHandler(ABC, metaclass=TypeHandlerMeta):
         raise NotImplementedError
 
     @classmethod
+    def is_valid_value(cls, value: Any) -> bool:
+        """Check if a value is valid for this type handler.
+
+        Base implementation just checks if value is instance of any handled type.
+        Override in handlers that accept additional compatible types.
+        """
+        print(f"Is valid Value?\n Is type {type(value)} in {cls.handled_types()}")
+        return any(isinstance(value, t) for t in cls.handled_types())
+
+    @classmethod
     @abstractmethod
     def get_struct_format(cls, field) -> str:
         """Return the struct format string for this type."""
@@ -100,7 +110,11 @@ class TypeHandler(ABC, metaclass=TypeHandlerMeta):
 
     @classmethod
     @abstractmethod
-    def unpack(cls, value: Any, field: Optional[Field]) -> Any:
+    def unpack(
+            cls,
+            value: Any, field: Optional[Field],
+            struct_config: Optional['StructConfig'] = None
+            ) -> Any:
         """Unpack a value from struct.unpack."""
         raise NotImplementedError
 
@@ -137,29 +151,23 @@ class TypeHandler(ABC, metaclass=TypeHandlerMeta):
 
     @staticmethod
     def _get_field_length_generic(field) -> Optional[int]:
-        """Return the required length of the struct component for this field
+        print(f"Getting field length. json_schema_extra: {field.json_schema_extra}")
+        print(f"Field metadata: {field.metadata}")
 
-        Args:
-            field: The field to check
-
-        Returns:
-            int: struct_length
-        """
-        # Get struct_length from json_schema_extra
         struct_length = None
         if field.json_schema_extra:
             struct_length = field.json_schema_extra.get('struct_length')
+        print(f"Found struct_length: {struct_length}")
 
-        # Return if set - this overrides other options
         if struct_length:
             return struct_length
 
-        # Get max_length from metadata
         max_length = None
         if field.metadata:
             for constraint in field.metadata:
                 if hasattr(constraint, 'max_length'):
                     max_length = constraint.max_length
                     break
+        print(f"Found max_length: {max_length}")
 
         return max_length

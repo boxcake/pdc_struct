@@ -54,7 +54,11 @@ class IPAddressHandler(TypeHandler):
         return value.packed
 
     @classmethod
-    def unpack(cls, value: bytes, field: Optional[Field] = None) -> Any:
+    def unpack(cls,
+               value: bytes,
+               field: Optional[Field] = None,
+               struct_config: Optional['StructConfig'] = None
+               ) -> Any:
         """Unpack bytes into IP address.
 
         Input bytes should be in network byte order (big endian).

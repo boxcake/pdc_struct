@@ -1,6 +1,17 @@
 # pdc_struct/__init__.py
 
 try:
+    from importlib.metadata import version, PackageNotFoundError
+    try:
+        __version__ = version("pdc_struct")
+    except PackageNotFoundError:
+        # package is not installed
+        __version__ = "0.1.0"
+except ImportError:
+    # importlib.metadata not available (Python < 3.8)
+    __version__ = "0.1.0"
+    
+try:
     from pydantic import VERSION as PYDANTIC_VERSION
 except ImportError:
     raise ImportError("Could not determine pydantic version. Is pydantic installed?")

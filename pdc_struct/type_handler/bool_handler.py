@@ -26,5 +26,9 @@ class BoolHandler(TypeHandler):
         return value
 
     @classmethod
-    def unpack(cls, value: bool, field: Optional[Field] = None) -> bool:
+    def unpack(cls,
+               value: bool,
+               field: Optional[Field] = None,
+               struct_config: Optional['StructConfig'] = None
+               ) -> bool:
         return bool(value)  # Ensure bool type

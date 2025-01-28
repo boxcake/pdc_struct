@@ -36,7 +36,11 @@ class UUIDHandler(TypeHandler):
         return value.bytes_le if field.struct_config.byte_order == ByteOrder.LITTLE_ENDIAN else value.bytes
 
     @classmethod
-    def unpack(cls, value: bytes, field: Optional[Field] = None) -> Union[UUID, None]:
+    def unpack(cls,
+               value: bytes,
+               field: Optional[Field] = None,
+               struct_config: Optional['StructConfig'] = None
+               ) -> Union[UUID, None]:
         """Unpack bytes into UUID with proper endianness."""
         if value is None:
             return None

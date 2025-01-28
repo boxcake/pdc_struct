@@ -23,11 +23,7 @@ class StringHandler(TypeHandler):
         return f'{struct_length}s'
 
     @classmethod
-    def pack(cls,
-             value: str,
-             field: Optional[Field] = None,
-             struct_config: Optional['StructConfig'] = None
-             ) -> bytes:
+    def pack(cls, value: str, field: Optional[Field] = None, struct_config: Optional['StructConfig'] = None) -> bytes:
         """Pack string to bytes.
 
         Args:
@@ -47,36 +43,48 @@ class StringHandler(TypeHandler):
         if not isinstance(value, str):
             return value
 
+        # Encode string and remove any embedded null bytes
         encoded = value.encode('utf-8')
+        cleaned = encoded.split(b'\0', 1)[0]
+        print(f"Packing string: '{value}' -> cleaned bytes: {[hex(b) for b in cleaned]}")
 
         # In DYNAMIC mode, just return the encoded string
         if not struct_config or struct_config.mode != StructMode.C_COMPATIBLE:
-            return encoded
+            return cleaned
 
         # In C_COMPATIBLE mode, handle fixed length and null termination
         length = cls._get_field_length_generic(field)
+        print(f"C_COMPATIBLE mode, length={length}")
+
         if length is None:
             raise ValueError("C_COMPATIBLE mode requires max_length or struct_length")
 
-        # Ensure null termination and padding
-        return encoded[:length - 1] + b'\0' + b'\0' * (length - len(encoded) - 1)
+        # Take maximum string length that will fit with null terminator
+        max_str_length = length - 1  # Reserve one byte for null terminator
+        print(f"Max string length: {max_str_length}")
+        truncated = cleaned[:max_str_length]
+        print(f"Taking bytes: {[hex(b) for b in truncated]} (length: {len(truncated)})")
+
+        # Add null terminator
+        result = truncated + b'\0'
+        print(f"After null terminator: {[hex(b) for b in result]} (length: {len(result)})")
+
+        # Add any remaining padding if needed
+        if len(result) < length:
+            result = result + b'\0' * (length - len(result))
+        print(f"Final result: {[hex(b) for b in result]} (length: {len(result)})")
+
+        return result
 
     @classmethod
-    def unpack(cls, value: bytes, field: Optional[Field] = None) -> str:
-        """Unpack bytes to string.
-
-        In C_COMPATIBLE mode:
-        - Stop at first null byte
-
-        In DYNAMIC mode:
-        - Strip all trailing nulls
-        """
+    def unpack(cls, value: bytes, field: Optional[Field] = None, struct_config: Optional['StructConfig'] = None) -> str:
+        print(f"Unpacking bytes: {value}")
         if value is None:
             return None
 
-        # Get mode from field metadata
-        is_c_compatible = (field and hasattr(field, 'struct_config') and
-                           field.struct_config.mode == StructMode.C_COMPATIBLE)
+        # Check mode from struct_config
+        is_c_compatible = struct_config and struct_config.mode == StructMode.C_COMPATIBLE
+        print(f"Is C_COMPATIBLE: {is_c_compatible}")
 
         if is_c_compatible:
             # Split at first null
@@ -85,4 +93,6 @@ class StringHandler(TypeHandler):
             # Strip all trailing nulls
             value = value.rstrip(b'\0')
 
-        return value.decode('utf-8')
+        result = value.decode('utf-8')
+        print(f"Unpacked result: '{result}'")
+        return result

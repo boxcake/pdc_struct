@@ -2,7 +2,7 @@
 from sys import byteorder as system_byte_order
 from typing import Any, Dict, Set, ClassVar, Literal
 from dataclasses import dataclass
-from pydantic import BaseModel, PrivateAttr
+from pydantic import BaseModel, PrivateAttr, Field
 from pydantic.fields import FieldInfo
 
 from pdc_struct import ByteOrder
@@ -27,10 +27,7 @@ class BitDefinition:
         return (1 << self.num_bits) - 1
 
 
-from pydantic import Field
-
-
-def Bit(start_bit: int, *additional_bits: int, **kwargs) -> FieldInfo:
+def Bit(start_bit: int, *additional_bits: int, **kwargs) -> FieldInfo:  # noqa
     """Create a Field with bit information stored in json_schema_extra."""
     # Calculate bit info
     num_bits = 1 + len(additional_bits)
@@ -89,34 +86,46 @@ class BitFieldModel(BaseModel):
                 bit_width=8  # Must be 8, 16, or 32
             )
 
-    Access individual fields as normal attributes. Use raw_value property to get/set
+    Access individual fields as normal attributes. Use packed_value property to get/set
     the packed integer representation for serialization.
     """
 
     # Class variables
+    # model_config = dict(arbitrary_types_allowed=True)
+
     struct_config: ClassVar[StructConfig] = StructConfig()
     _bit_definitions: ClassVar[Dict[str, BitDefinition]] = {}
     _struct_format: ClassVar[str] = "B"  # Default to byte, updated in __pydantic_init_subclass__
 
-    def __init__(self, __bit_sequence: bytes = None, **data):
-        # If bytes passed, parse them first
-        if __bit_sequence is not None:
+    def __init__(self, **data):
+        if 'packed_value' in data:
+            packed_value = data.pop('packed_value')
 
-            byte_order: Literal['little', 'big'] = system_byte_order
-            if self.struct_config.byte_order is ByteOrder.LITTLE_ENDIAN:
-                byte_order = 'little'
-            elif self.struct_config.byte_order is ByteOrder.BIG_ENDIAN:
-                byte_order = 'big'
-
-            value = int.from_bytes(__bit_sequence, byteorder=byte_order)
+            # Process packed_value to integer
+            if isinstance(packed_value, bytes):
+                # Process bit sequence to field values
+                byte_order: Literal['little', 'big'] = system_byte_order
+                if self.struct_config.byte_order is ByteOrder.LITTLE_ENDIAN:
+                    byte_order = 'little'
+                elif self.struct_config.byte_order is ByteOrder.BIG_ENDIAN:
+                    byte_order = 'big'
+                value = int.from_bytes(packed_value, byteorder=byte_order)
+            elif isinstance(packed_value, int):
+                value = packed_value
+            else:
+                raise TypeError(f"packed_value must be bytes or int, not {type(packed_value)}")
 
             # Convert raw value to field values
+            field_values = {}
             for name, bit_def in self._bit_definitions.items():
                 if bit_def.is_bool:
-                    data[name] = bool(value & (1 << bit_def.start_bit))
+                    field_values[name] = bool(value & (1 << bit_def.start_bit))
                 else:
                     mask = ((1 << bit_def.num_bits) - 1) << bit_def.start_bit
-                    data[name] = (value & mask) >> bit_def.start_bit
+                    field_values[name] = (value & mask) >> bit_def.start_bit
+
+            field_values.update(data)  # let explicit values override
+            data = field_values
 
         super().__init__(**data)
 
@@ -144,7 +153,7 @@ class BitFieldModel(BaseModel):
 
         # Collect bit definitions from fields
         used_bits: Set[int] = set()
-        for name, field in cls.model_fields.items():
+        for name, field in cls.model_fields.items():    # noqa - property returns a dict
             if field.json_schema_extra and 'bit_info' in field.json_schema_extra:
                 bit_info = field.json_schema_extra['bit_info']
                 start_bit = bit_info['start_bit']
@@ -167,7 +176,7 @@ class BitFieldModel(BaseModel):
                 )
 
     @property
-    def raw_value(self) -> int:
+    def packed_value(self) -> int:
         """Calculate bit value from current attributes."""
         value = 0
         for name, bit_def in self._bit_definitions.items():
@@ -186,8 +195,8 @@ class BitFieldModel(BaseModel):
                 value |= (attr_value << bit_def.start_bit)
         return value
 
-    @raw_value.setter
-    def raw_value(self, value: int):
+    @packed_value.setter
+    def packed_value(self, value: int):
         max_value = (1 << self.struct_config.bit_width) - 1
         if not 0 <= value <= max_value:
             raise ValueError(f"Value {value} out of range for {self.struct_config.bit_width} bits")
@@ -202,6 +211,22 @@ class BitFieldModel(BaseModel):
                 value_to_set = (value & mask) >> bit_def.start_bit
 
             self.__pydantic_validator__.validate_assignment(self, name, value_to_set)
+
+    def clone(self, **field_updates) -> 'BitFieldModel':
+        """Create a new instance with the same packed value but optionally override specific fields.
+
+        Args:
+            **field_updates: Field values to override in the new instance.
+                Any fields not specified will retain their values from the current instance.
+
+        Returns:
+            A new instance of the same class with the specified updates applied.
+
+        Examples:
+            >>> flags = ByteFlags(packed_value=b'\xFF')  # all bits set
+            >>> new_flags = flags.clone(read=False)  # copy state but clear read bit
+        """
+        return self.__class__(packed_value=self.packed_value, **field_updates)
 
     @property
     def struct_format_string(self) -> str:

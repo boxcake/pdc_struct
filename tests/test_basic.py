@@ -109,34 +109,69 @@ def test_invalid_string_length_dynamic():
     assert recovered.string_field == "this strin"
 
 
-def test_invalid_string_length_c_compatible():
-    """Test string truncation in C_COMPATIBLE mode."""
-
-    class CCompatibleModel(StructModel):
-        """Test model in C_COMPATIBLE mode"""
-        int_field: int = Field(description="Integer field")
-        float_field: float = Field(description="Float field")
-        string_field: str = Field(
-            max_length=30,
-            struct_length=10,
-            description="String field"
+def test_string_handling_c_compatible():
+    """Test string handling in C_COMPATIBLE mode, including:
+    - ASCII strings (1 byte per char)
+    - Unicode strings (multi-byte chars)
+    - String length vs struct length handling
+    - Mixed initialization methods
+    """
+    class StringModel(StructModel):
+        ascii_field: str = Field(
+            default=None,          # Allow None initially
+            max_length=10,         # Max 10 characters
+            struct_length=11,      # 10 bytes + null terminator (sufficient for ASCII)
+            description="Field for ASCII strings"
         )
-        bool_field: bool = Field(description="Boolean field")
-
+        unicode_field: str = Field(
+            default=None,          # Allow None initially
+            max_length=5,          # Max 5 characters
+            struct_length=21,      # Space for 5 4-byte chars + null terminator
+            description="Field for Unicode strings"
+        )
         struct_config = StructConfig(
             mode=StructMode.C_COMPATIBLE,
             version=StructVersion.V1,
             byte_order=ByteOrder.LITTLE_ENDIAN
         )
-    model = CCompatibleModel(
-        int_field=42,
-        float_field=3.14,
-        string_field="this string is way too long",
-        bool_field=True
+
+    # Test ASCII strings
+    model = StringModel(
+        ascii_field="Hello Test",  # 9 ASCII chars
+        unicode_field="Hello"      # 5 ASCII chars
     )
+    packed = model.to_bytes()
+    recovered = StringModel.from_bytes(packed)
+    assert recovered.ascii_field == "Hello Test"
+    assert recovered.unicode_field == "Hello"
 
-    data = model.to_bytes()
-    recovered = type(model).from_bytes(data)
+    # Test Unicode strings with multi-byte characters
+    model = StringModel(
+        ascii_field="ASCII",
+        unicode_field="日本語"    # 3 Japanese characters, each 3 bytes in UTF-8
+    )
+    packed = model.to_bytes()
+    recovered = StringModel.from_bytes(packed)
+    assert recovered.ascii_field == "ASCII"
+    assert recovered.unicode_field == "日本語"
 
-    # Should be null-terminated in C_COMPATIBLE mode
-    assert recovered.string_field == "this strin"
+    # Test mixed ASCII and Unicode
+    model = StringModel(
+        ascii_field="Hi!",
+        unicode_field="Hi 🌍"     # ASCII + emoji (emoji is 4 bytes)
+    )
+    packed = model.to_bytes()
+    recovered = StringModel.from_bytes(packed)
+    assert recovered.ascii_field == "Hi!"
+    assert recovered.unicode_field == "Hi 🌍"
+
+    # Test initialization from packed value
+    packed = model.to_bytes()
+    from_packed = StringModel(packed_value=packed)
+    assert from_packed.ascii_field == "Hi!"
+    assert from_packed.unicode_field == "Hi 🌍"
+
+    # Test cloning
+    cloned = model.clone(ascii_field="New")
+    assert cloned.ascii_field == "New"
+    assert cloned.unicode_field == "Hi 🌍"

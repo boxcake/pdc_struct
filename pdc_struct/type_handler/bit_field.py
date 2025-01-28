@@ -60,10 +60,14 @@ class BitFieldHandler(TypeHandler):
         """Pack BitFieldStruct to integer value."""
         if value is None:
             return None
-        return value.raw_value
+        return value.packed_value
 
     @classmethod
-    def unpack(cls, value: int, field: Optional[Field] = None) -> Union[BitFieldModel, None]:
+    def unpack(cls,
+               value: int,
+               field: Optional[Field] = None,
+               struct_config: Optional['StructConfig'] = None
+               ) -> Union[BitFieldModel, None]:
         """Unpack integer value to BitFieldStruct."""
         if value is None:
             return None
@@ -75,5 +79,5 @@ class BitFieldHandler(TypeHandler):
 
         # Create instance and set raw value
         instance = field_type()
-        instance.raw_value = value
+        instance.packed_value = value
         return instance
