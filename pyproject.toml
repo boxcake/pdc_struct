@@ -12,14 +12,37 @@ description = "A Pydantic extension for struct-compatible serialization"
 readme = "README.md"
 requires-python = ">=3.10"
 classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: System :: Networking",
+    "Topic :: Software Development :: Code Generators",
     "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
 ]
+keywords = ["struct", "binary", "serialization", "pydantic", "c-interop", "networking", "bytes", "pack", "unpack"]
 dependencies = [
     "pydantic>=2.0.0",
 ]
 
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+    "black>=23.0",
+    "ruff>=0.1.0",
+]
+test = [
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+]
+
 [project.urls]
-"Homepage" = "https://github.com/yourusername/pdc_struct"
-"Bug Tracker" = "https://github.com/yourusername/pdc_struct/issues"
+"Homepage" = "https://github.com/boxcake/pdc_struct"
+"Bug Tracker" = "https://github.com/boxcake/pdc_struct/issues"
+"Repository" = "https://github.com/boxcake/pdc_struct"

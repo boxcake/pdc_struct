@@ -16,7 +16,13 @@ PDC Struct is a Pydantic extension that enables binary serialization of Pydantic
 ## Installation
 
 ```bash
-pip install git+hhttps://github.com/boxcake/pdc_struct.git
+pip install pdc_struct
+```
+
+Or install from source:
+
+```bash
+pip install git+https://github.com/boxcake/pdc_struct.git
 ```
 
 **Requirements**:
