@@ -1,5 +1,11 @@
 # PDC Struct
 
+[![Tests](https://github.com/boxcake/pdc_struct/actions/workflows/test.yml/badge.svg)](https://github.com/boxcake/pdc_struct/actions/workflows/test.yml)
+[![codecov](https://codecov.io/gh/boxcake/pdc_struct/branch/main/graph/badge.svg)](https://codecov.io/gh/boxcake/pdc_struct)
+[![PyPI version](https://badge.fury.io/py/pdc-struct.svg)](https://badge.fury.io/py/pdc-struct)
+[![Python Version](https://img.shields.io/pypi/pyversions/pdc-struct.svg)](https://pypi.org/project/pdc-struct/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 PDC Struct is a Pydantic extension that enables binary serialization of Pydantic models for efficient data exchange and C-compatible binary protocols. It combines Pydantic's powerful validation capabilities with Python's struct module to create a seamless bridge between high-level Python data models and low-level binary formats.
 
 ## Features
