@@ -1,13 +1,17 @@
 """StructModel type handler for nested PDC Struct serialization"""
+
 # This must live outside the type_handler package to avoid a circular import
 
-from typing import Optional, Union, get_args
+from typing import TYPE_CHECKING, Optional, Union, get_args
 
 from pydantic import Field
 
 from .struct_model import StructModel, StructMode
 from ..type_handler.meta import TypeHandler
 from ..types import is_optional_type
+
+if TYPE_CHECKING:
+    from .struct_config import StructConfig
 
 
 class StructModelHandler(TypeHandler):
@@ -38,17 +42,17 @@ class StructModelHandler(TypeHandler):
         # Store it in the field's metadata for use during packing/unpacking
         if not field.json_schema_extra:
             field.json_schema_extra = {}
-        field.json_schema_extra['struct_length'] = struct_length
+        field.json_schema_extra["struct_length"] = struct_length
 
         # Return format for a bytes field of the required size
-        return f'{struct_length}s'
+        return f"{struct_length}s"
 
     @classmethod
     def pack(
-            cls,
-            value: StructModel,
-            field: Optional[Field] = None,
-            struct_config: Optional['StructConfig'] = None
+        cls,
+        value: StructModel,
+        field: Optional[Field] = None,
+        struct_config: Optional["StructConfig"] = None,
     ) -> Union[bytes, None]:
         """Pack another StructModel object as bytes"""
         if value is None:
@@ -56,7 +60,7 @@ class StructModelHandler(TypeHandler):
             if struct_config and struct_config.mode == StructMode.C_COMPATIBLE:
                 # In C mode, return zeroed bytes of correct length
                 struct_length = cls._get_field_length_generic(field)
-                return b'\0' * struct_length
+                return b"\0" * struct_length
             return None
 
         # If parent wants to propagate byte order, override the child's setting
@@ -68,10 +72,10 @@ class StructModelHandler(TypeHandler):
 
     @classmethod
     def unpack(
-            cls,
-            value: bytes,
-            field: Optional[Field] = None,
-            struct_config: Optional['StructConfig'] = None  # noqa
+        cls,
+        value: bytes,
+        field: Optional[Field] = None,
+        struct_config: Optional["StructConfig"] = None,  # noqa
     ) -> Union[StructModel, None]:
         """Unpack bytes into an instance of the right StructModel"""
         if value is None:
@@ -83,7 +87,9 @@ class StructModelHandler(TypeHandler):
             model_class = get_args(model_class)[0]
 
         if not issubclass(model_class, StructModel):
-            raise ValueError(f"Field annotation must be a StructModel subclass, got {model_class}")
+            raise ValueError(
+                f"Field annotation must be a StructModel subclass, got {model_class}"
+            )
 
         # Get parent's byte order if we should propagate it
         override_endian = None

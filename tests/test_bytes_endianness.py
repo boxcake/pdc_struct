@@ -1,13 +1,10 @@
-""" tests/test_bytes_endianness.py:  """
+"""tests/test_bytes_endianness.py:"""
 
-import pytest
-import struct
 from pydantic import Field
 from pdc_struct import (
     StructModel,
     StructMode,
     StructConfig,
-    StructVersion,
     ByteOrder,
 )
 
@@ -19,12 +16,11 @@ def test_bytes_endianness():
         mac_address: bytes = Field(struct_length=6, description="MAC address")
 
         struct_config = StructConfig(
-            mode=StructMode.C_COMPATIBLE,
-            byte_order=ByteOrder.LITTLE_ENDIAN
+            mode=StructMode.C_COMPATIBLE, byte_order=ByteOrder.LITTLE_ENDIAN
         )
 
     # Create a test MAC address
-    mac = bytes.fromhex('001122334455')
+    mac = bytes.fromhex("001122334455")
 
     # Test little endian struct
     model_le = BytesModel(mac_address=mac)
@@ -35,8 +31,7 @@ def test_bytes_endianness():
     # Test big endian struct
     class BytesModelBE(BytesModel):
         struct_config = StructConfig(
-            mode=StructMode.C_COMPATIBLE,
-            byte_order=ByteOrder.BIG_ENDIAN
+            mode=StructMode.C_COMPATIBLE, byte_order=ByteOrder.BIG_ENDIAN
         )
 
     model_be = BytesModelBE(mac_address=mac)

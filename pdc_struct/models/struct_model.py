@@ -21,14 +21,13 @@ class StructModel(BaseModel):
     _field_handlers: ClassVar[Dict[str, TypeHandler]] = {}
 
     def __init__(self, **data):
-        if 'packed_value' in data:
-            packed_value = data.pop('packed_value')
+        if "packed_value" in data:
+            packed_value = data.pop("packed_value")
             # Create temporary instance to unpack the values
             unpacked = self.__class__.from_bytes(packed_value)
             # Get the field values from the unpacked instance
             field_values = {
-                name: getattr(unpacked, name)
-                for name in self.model_fields.keys()
+                name: getattr(unpacked, name) for name in self.model_fields.keys()
             }
             # Let explicit values override packed values
             field_values.update(data)
@@ -43,20 +42,30 @@ class StructModel(BaseModel):
 
         # Validate struct_config options
         if not isinstance(cls.struct_config.mode, StructMode):
-            raise ValueError(f"Invalid mode: {cls.struct_config.mode}. Must be a StructMode enum value.")
+            raise ValueError(
+                f"Invalid mode: {cls.struct_config.mode}. Must be a StructMode enum value."
+            )
 
         if not isinstance(cls.struct_config.version, StructVersion):
-            raise ValueError(f"Invalid version: {cls.struct_config.version}. Must be a StructVersion enum value.")
+            raise ValueError(
+                f"Invalid version: {cls.struct_config.version}. Must be a StructVersion enum value."
+            )
 
         if not isinstance(cls.struct_config.byte_order, ByteOrder):
-            raise ValueError(f"Invalid byte_order: {cls.struct_config.byte_order}. Must be a ByteOrder enum value.")
+            raise ValueError(
+                f"Invalid byte_order: {cls.struct_config.byte_order}. Must be a ByteOrder enum value."
+            )
 
         # Cache handlers and validate fields
         cls._field_handlers = {}
-        for field_name, field in cls.model_fields.items():  # noqa - model_fields property returns dict
+        for (
+            field_name,
+            field,
+        ) in cls.model_fields.items():  # noqa - model_fields property returns dict
             # For C_COMPATIBLE mode, validate Optional fields have defaults
-            if (cls.struct_config.mode == StructMode.C_COMPATIBLE and
-                    is_optional_type(field.annotation)):
+            if cls.struct_config.mode == StructMode.C_COMPATIBLE and is_optional_type(
+                field.annotation
+            ):
                 # Check for either default value or default_factory
                 if field.default is None and field.default_factory is None:
                     python_type = unwrap_optional_type(field.annotation)
@@ -81,7 +90,7 @@ class StructModel(BaseModel):
             except ValueError as e:
                 raise ValueError(f"Field '{field_name}': {e}")
 
-    def clone(self, **field_updates) -> 'StructMoel':
+    def clone(self, **field_updates) -> "StructModel":
         """Create a new instance with the same packed value but optionally override specific fields.
 
         Args:
@@ -136,7 +145,11 @@ class StructModel(BaseModel):
         return struct.calcsize(cls.struct_format_string())
 
     @classmethod
-    def get_struct_format(cls, present_fields: Optional[list] = None, byte_order: Optional[ByteOrder] = None) -> str:
+    def get_struct_format(
+        cls,
+        present_fields: Optional[list] = None,
+        byte_order: Optional[ByteOrder] = None,
+    ) -> str:
         """Generate struct format string from model fields.
 
         Args:
@@ -146,18 +159,24 @@ class StructModel(BaseModel):
                        Used primarily for nested structs to match parent endianness.
         """
         format_parts = []
-        fields_to_process = present_fields or cls.model_fields.keys()  # noqa - model_fields property returns dict
+        fields_to_process = (
+            present_fields or cls.model_fields.keys()
+        )  # noqa - model_fields property returns dict
 
         for field_name in fields_to_process:
-            field = cls.model_fields[field_name]  # noqa - model_fields property returns dict
+            field = cls.model_fields[
+                field_name
+            ]  # noqa - model_fields property returns dict
             handler = cls._field_handlers[field_name]
             format_parts.append(handler.get_struct_format(field))
 
         # Use override_endian if provided, otherwise use struct_config's byte_order
         effective_byte_order = byte_order or cls.struct_config.byte_order
-        return effective_byte_order.value + ''.join(format_parts)
+        return effective_byte_order.value + "".join(format_parts)
 
-    def _pack_value(self, field_name: str, value: Any, byte_order: Optional[ByteOrder] = None) -> Any:
+    def _pack_value(
+        self, field_name: str, value: Any, byte_order: Optional[ByteOrder] = None
+    ) -> Any:
         """Pack a single value using its handler."""
         if value is None:
             return None
@@ -175,7 +194,7 @@ class StructModel(BaseModel):
                     {
                         "loc": (field_name,),
                         "msg": f"Expected {expected_type.__name__}, got {type(value).__name__}",
-                        "type": "type_error"
+                        "type": "type_error",
                     }
                 ]
             )
@@ -185,19 +204,19 @@ class StructModel(BaseModel):
                 mode=self.struct_config.mode,
                 version=self.struct_config.version,
                 byte_order=byte_order,
-                propagate_byte_order=self.struct_config.propagate_byte_order
+                propagate_byte_order=self.struct_config.propagate_byte_order,
             )
         else:
             temp_config = self.struct_config
 
         return self._field_handlers[field_name].pack(
-            value,
-            field=field,
-            struct_config=temp_config
+            value, field=field, struct_config=temp_config
         )
 
     @classmethod
-    def _unpack_value(cls, field_name: str, value: Any, byte_order: Optional[ByteOrder] = None) -> Any:
+    def _unpack_value(
+        cls, field_name: str, value: Any, byte_order: Optional[ByteOrder] = None
+    ) -> Any:
         """Unpack a single value using its handler.
 
         Args:
@@ -209,7 +228,7 @@ class StructModel(BaseModel):
         if value is None:
             return None
 
-        field = cls.model_fields[field_name]    # noqa - property is a dict
+        field = cls.model_fields[field_name]  # noqa - property is a dict
 
         # Create a temporary struct_config with the overridden byte_order if provided
         if byte_order is not None:
@@ -217,15 +236,13 @@ class StructModel(BaseModel):
                 mode=cls.struct_config.mode,
                 version=cls.struct_config.version,
                 byte_order=byte_order,
-                propagate_byte_order=cls.struct_config.propagate_byte_order
+                propagate_byte_order=cls.struct_config.propagate_byte_order,
             )
         else:
             temp_config = cls.struct_config
 
         return cls._field_handlers[field_name].unpack(
-            value,
-            field=field,
-            struct_config=temp_config
+            value, field=field, struct_config=temp_config
         )
 
     def to_bytes(self, override_endian: Optional[ByteOrder] = None) -> bytes:
@@ -244,7 +261,9 @@ class StructModel(BaseModel):
         """
         # Validate version - currently only V1 is supported
         if self.struct_config.version != StructVersion.V1:
-            raise ValueError(f"Unsupported struct version: {self.struct_config.version}")
+            raise ValueError(
+                f"Unsupported struct version: {self.struct_config.version}"
+            )
 
         # Get effective byte order
         byte_order = override_endian or self.struct_config.byte_order
@@ -257,7 +276,7 @@ class StructModel(BaseModel):
                 return self._to_bytes_v1_dynamic(byte_order)
             case _:
                 raise ValueError(f"Unsupported mode: {self.struct_config.mode}")
-        
+
     def _to_bytes_v1_c_compatible(self, byte_order: ByteOrder) -> bytes:
         """Pack data in C-compatible mode (V1).
 
@@ -285,7 +304,9 @@ class StructModel(BaseModel):
             for field_name, field in self.model_fields.items():
                 value = getattr(self, field_name)
                 # Pass byte_order to pack_value for nested structs
-                values.append(self._pack_value(field_name, value, byte_order=byte_order))
+                values.append(
+                    self._pack_value(field_name, value, byte_order=byte_order)
+                )
 
             return struct.pack(format_string, *values)
 
@@ -325,16 +346,20 @@ class StructModel(BaseModel):
                 present_fields = list(self.model_fields.keys())
 
             # Pack the data fields
-            packed = b''
+            packed = b""
             if present_fields:
                 # Get format string for present fields only, using provided byte order
-                format_string = self.get_struct_format(present_fields, byte_order=byte_order)
+                format_string = self.get_struct_format(
+                    present_fields, byte_order=byte_order
+                )
                 values = []
 
                 # Pack each present field using its handler
                 for field_name in present_fields:
                     value = getattr(self, field_name)
-                    values.append(self._pack_value(field_name, value, byte_order=byte_order))
+                    values.append(
+                        self._pack_value(field_name, value, byte_order=byte_order)
+                    )
 
                 packed = struct.pack(format_string, *values)
 
@@ -345,12 +370,14 @@ class StructModel(BaseModel):
             if has_optional:
                 flags |= HeaderFlags.HAS_OPTIONAL_FIELDS
 
-            header = bytes([
-                self.struct_config.version.value,  # Version
-                flags,  # Flags
-                0,  # Reserved
-                0  # Reserved
-            ])
+            header = bytes(
+                [
+                    self.struct_config.version.value,  # Version
+                    flags,  # Flags
+                    0,  # Reserved
+                    0,  # Reserved
+                ]
+            )
 
             return header + bitmap + packed
 
@@ -358,7 +385,9 @@ class StructModel(BaseModel):
             raise StructPackError(f"Failed to pack struct data: {e}")
 
     @classmethod
-    def from_bytes(cls: Type[T], data: bytes, override_endian: Optional[ByteOrder] = None) -> T:
+    def from_bytes(
+        cls: Type[T], data: bytes, override_endian: Optional[ByteOrder] = None
+    ) -> T:
         """Create model instance from bytes using configured mode and version.
 
         Args:
@@ -384,7 +413,9 @@ class StructModel(BaseModel):
         # No defaults needed-We validate that the options are valid enum values in post init checks
 
     @classmethod
-    def _from_bytes_v1_c_compatible(cls: Type[T], data: bytes, byte_order: Optional[ByteOrder] = None) -> T:
+    def _from_bytes_v1_c_compatible(
+        cls: Type[T], data: bytes, byte_order: Optional[ByteOrder] = None
+    ) -> T:
         """Unpack data in C-compatible mode (V1).
 
         In C_COMPATIBLE mode:
@@ -413,7 +444,9 @@ class StructModel(BaseModel):
             # Build field dictionary using handlers
             field_dict = {}
             for (field_name, field), value in zip(cls.model_fields.items(), values):
-                field_dict[field_name] = cls._unpack_value(field_name, value, byte_order=byte_order)
+                field_dict[field_name] = cls._unpack_value(
+                    field_name, value, byte_order=byte_order
+                )
 
             return cls.model_validate(field_dict)
 
@@ -421,8 +454,12 @@ class StructModel(BaseModel):
             raise StructUnpackError(f"Failed to unpack struct data: {e}")
 
     @classmethod
-    def _from_bytes_v1_dynamic(cls: Type[T], data: bytes, ignore_header_endian: bool = False,
-                               byte_order: Optional[ByteOrder] = None) -> T:
+    def _from_bytes_v1_dynamic(
+        cls: Type[T],
+        data: bytes,
+        ignore_header_endian: bool = False,
+        byte_order: Optional[ByteOrder] = None,
+    ) -> T:
         """Unpack data in dynamic mode (V1).
 
         In DYNAMIC mode:
@@ -468,9 +505,11 @@ class StructModel(BaseModel):
 
             # Check endianness from header unless ignored
             if not ignore_header_endian:
-                effective_byte_order = (ByteOrder.BIG_ENDIAN
-                                        if flags & HeaderFlags.BIG_ENDIAN
-                                        else ByteOrder.LITTLE_ENDIAN)
+                effective_byte_order = (
+                    ByteOrder.BIG_ENDIAN
+                    if flags & HeaderFlags.BIG_ENDIAN
+                    else ByteOrder.LITTLE_ENDIAN
+                )
 
             # Handle optional fields
             if flags & HeaderFlags.HAS_OPTIONAL_FIELDS:
@@ -486,13 +525,17 @@ class StructModel(BaseModel):
                 return cls.model_validate(field_dict)
 
             # Create format string and unpack using effective byte order
-            format_string = effective_byte_order.value + cls.get_struct_format(present_fields)[1:]
+            format_string = (
+                effective_byte_order.value + cls.get_struct_format(present_fields)[1:]
+            )
             values = struct.unpack(format_string, data)
 
             # Build field dictionary using handlers
             field_dict = {}
             for name, value in zip(present_fields, values):
-                field_dict[name] = cls._unpack_value(name, value, byte_order=effective_byte_order)
+                field_dict[name] = cls._unpack_value(
+                    name, value, byte_order=effective_byte_order
+                )
 
             # Set None for missing optional fields
             for name, field in cls.model_fields.items():

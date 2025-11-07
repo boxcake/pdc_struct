@@ -1,9 +1,13 @@
-""" Handler for string packing/unpacking """
-from typing import Optional
+"""Handler for string packing/unpacking"""
+
+from typing import TYPE_CHECKING, Optional
 from pydantic import Field
 
 from pdc_struct.enums import StructMode
 from .meta import TypeHandler
+
+if TYPE_CHECKING:
+    from ..models.struct_config import StructConfig
 
 
 class StringHandler(TypeHandler):
@@ -20,10 +24,15 @@ class StringHandler(TypeHandler):
     @classmethod
     def get_struct_format(cls, field) -> str:
         struct_length = cls._get_field_length_generic(field)
-        return f'{struct_length}s'
+        return f"{struct_length}s"
 
     @classmethod
-    def pack(cls, value: str, field: Optional[Field] = None, struct_config: Optional['StructConfig'] = None) -> bytes:
+    def pack(
+        cls,
+        value: str,
+        field: Optional[Field] = None,
+        struct_config: Optional["StructConfig"] = None,
+    ) -> bytes:
         """Pack string to bytes.
 
         Args:
@@ -42,9 +51,11 @@ class StringHandler(TypeHandler):
         """
 
         # Encode string and remove any embedded null bytes
-        encoded = value.encode('utf-8')
-        cleaned = encoded.split(b'\0', 1)[0]
-        print(f"Packing string: '{value}' -> cleaned bytes: {[hex(b) for b in cleaned]}")
+        encoded = value.encode("utf-8")
+        cleaned = encoded.split(b"\0", 1)[0]
+        print(
+            f"Packing string: '{value}' -> cleaned bytes: {[hex(b) for b in cleaned]}"
+        )
 
         # In DYNAMIC mode, just return the encoded string
         if not struct_config or struct_config.mode != StructMode.C_COMPATIBLE:
@@ -64,28 +75,37 @@ class StringHandler(TypeHandler):
         print(f"Taking bytes: {[hex(b) for b in truncated]} (length: {len(truncated)})")
 
         # Add null terminator
-        result = truncated + b'\0'
-        print(f"After null terminator: {[hex(b) for b in result]} (length: {len(result)})")
+        result = truncated + b"\0"
+        print(
+            f"After null terminator: {[hex(b) for b in result]} (length: {len(result)})"
+        )
 
         # Add any remaining padding if needed
         if len(result) < length:
-            result = result + b'\0' * (length - len(result))
+            result = result + b"\0" * (length - len(result))
         print(f"Final result: {[hex(b) for b in result]} (length: {len(result)})")
 
         return result
 
     @classmethod
-    def unpack(cls, value: bytes, field: Optional[Field] = None, struct_config: Optional['StructConfig'] = None) -> str:
+    def unpack(
+        cls,
+        value: bytes,
+        field: Optional[Field] = None,
+        struct_config: Optional["StructConfig"] = None,
+    ) -> str:
 
         # Check mode from struct_config
-        is_c_compatible = struct_config and struct_config.mode == StructMode.C_COMPATIBLE
+        is_c_compatible = (
+            struct_config and struct_config.mode == StructMode.C_COMPATIBLE
+        )
 
         if is_c_compatible:
             # Split at first null
-            value = value.split(b'\0', 1)[0]
+            value = value.split(b"\0", 1)[0]
         else:
             # Strip all trailing nulls
-            value = value.rstrip(b'\0')
+            value = value.rstrip(b"\0")
 
-        result = value.decode('utf-8')
+        result = value.decode("utf-8")
         return result

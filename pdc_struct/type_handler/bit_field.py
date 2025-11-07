@@ -1,9 +1,13 @@
 """Type handler for BitFieldStruct types."""
-from typing import Optional, Union
+
+from typing import TYPE_CHECKING, Optional, Union
 from pydantic import Field
 
 from .meta import TypeHandler
 from ..models.bit_field import BitFieldModel
+
+if TYPE_CHECKING:
+    from ..models.struct_config import StructConfig
 
 
 class BitFieldHandler(TypeHandler):
@@ -26,9 +30,9 @@ class BitFieldHandler(TypeHandler):
 
         # Map the bit width to struct format
         return {
-            8: 'B',  # unsigned char
-            16: 'H',  # unsigned short
-            32: 'I'  # unsigned int
+            8: "B",  # unsigned char
+            16: "H",  # unsigned short
+            32: "I",  # unsigned int
         }[dummy_instance.struct_config.bit_width]
 
     @classmethod
@@ -52,22 +56,26 @@ class BitFieldHandler(TypeHandler):
             raise ValueError(f"Failed to validate bit field structure: {e}")
 
     @classmethod
-    def pack(cls,
-             value: BitFieldModel,
-             field: Optional[Field] = None,
-             struct_config: Optional['StructConfig'] = None,  # noqa - Ignore StructConfig due to circular import
-             ) -> Union[int, None]:
+    def pack(
+        cls,
+        value: BitFieldModel,
+        field: Optional[Field] = None,
+        struct_config: Optional[
+            "StructConfig"
+        ] = None,  # noqa - Ignore StructConfig due to circular import
+    ) -> Union[int, None]:
         """Pack BitFieldStruct to integer value."""
         if value is None:
             return None
         return value.packed_value
 
     @classmethod
-    def unpack(cls,
-               value: int,
-               field: Optional[Field] = None,
-               struct_config: Optional['StructConfig'] = None
-               ) -> Union[BitFieldModel, None]:
+    def unpack(
+        cls,
+        value: int,
+        field: Optional[Field] = None,
+        struct_config: Optional["StructConfig"] = None,
+    ) -> Union[BitFieldModel, None]:
         """Unpack integer value to BitFieldStruct."""
 
         # Get the BitFieldStruct class

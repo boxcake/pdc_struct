@@ -1,9 +1,13 @@
 """Enum type handler for PDC Struct."""
+
 from enum import Enum, IntEnum, StrEnum
-from typing import Optional, Union
+from typing import TYPE_CHECKING, Optional, Union
 from pydantic import Field
 
 from .meta import TypeHandler
+
+if TYPE_CHECKING:
+    from ..models.struct_config import StructConfig
 
 
 class EnumHandler(TypeHandler):
@@ -16,9 +20,9 @@ class EnumHandler(TypeHandler):
     @classmethod
     def get_struct_format(cls, field) -> str:
         # By default, pack as 32-bit integer
-        if field.json_schema_extra and 'struct_format' in field.json_schema_extra:
-            return field.json_schema_extra['struct_format']
-        return 'i'
+        if field.json_schema_extra and "struct_format" in field.json_schema_extra:
+            return field.json_schema_extra["struct_format"]
+        return "i"
 
     @classmethod
     def validate_field(cls, field) -> None:
@@ -34,7 +38,9 @@ class EnumHandler(TypeHandler):
         if issubclass(enum_class, StrEnum):
             if not field.json_schema_extra:
                 field.json_schema_extra = {}
-            field.json_schema_extra['enum_members'] = list(enum_class.__members__.values())
+            field.json_schema_extra["enum_members"] = list(
+                enum_class.__members__.values()
+            )
         else:
             # For non-StrEnum types, verify values are integers or convertible to integers
             for member in enum_class:
@@ -47,11 +53,12 @@ class EnumHandler(TypeHandler):
                     )
 
     @classmethod
-    def pack(cls,
-             value: Enum,
-             field: Optional[Field]=None,
-             struct_config: Optional['StructConfig'] = None     # noqa
-             ) -> Union[int, None]:
+    def pack(
+        cls,
+        value: Enum,
+        field: Optional[Field] = None,
+        struct_config: Optional["StructConfig"] = None,  # noqa
+    ) -> Union[int, None]:
         """Pack enum value.
 
         For StrEnum: converts to index
@@ -66,11 +73,12 @@ class EnumHandler(TypeHandler):
         return int(value.value)
 
     @classmethod
-    def unpack(cls,
-               value: int,
-               field: Optional[Field] = None,
-               struct_config: Optional['StructConfig'] = None
-               ) -> Union[Enum, None]:
+    def unpack(
+        cls,
+        value: int,
+        field: Optional[Field] = None,
+        struct_config: Optional["StructConfig"] = None,
+    ) -> Union[Enum, None]:
         """Unpack integer into enum member.
 
         Args:
@@ -94,8 +102,9 @@ class EnumHandler(TypeHandler):
 
         if issubclass(enum_class, StrEnum):
             # For StrEnum, use cached members list or build it
-            members = (field.json_schema_extra and field.json_schema_extra.get('enum_members')) or \
-                      list(enum_class.__members__.values())
+            members = (
+                field.json_schema_extra and field.json_schema_extra.get("enum_members")
+            ) or list(enum_class.__members__.values())
             try:
                 return members[value]
             except IndexError:

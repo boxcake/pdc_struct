@@ -1,26 +1,29 @@
 """Test BitFieldModel functionality."""
+
 from typing import Optional
 
-import pydantic_core
 import pytest
-from pydantic import ValidationError, Field
-from pdc_struct import BitFieldModel, StructConfig, StructMode, ByteOrder, Bit, StructModel
+from pydantic import Field
+from pdc_struct import (
+    BitFieldModel,
+    StructConfig,
+    StructMode,
+    ByteOrder,
+    Bit,
+    StructModel,
+)
 import importlib
 import sys
-
-from pdc_struct.models import struct_config
 
 
 def test_basic_boolean_bits():
     """Test basic boolean bit operations."""
+
     class BoolFlags(BitFieldModel):
         read: bool = Bit(0)
         write: bool = Bit(1)
         exec: bool = Bit(2)
-        struct_config = StructConfig(
-            mode=StructMode.C_COMPATIBLE,
-            bit_width=8
-        )
+        struct_config = StructConfig(mode=StructMode.C_COMPATIBLE, bit_width=8)
 
     flags = BoolFlags()
     assert not flags.read
@@ -40,6 +43,7 @@ def test_basic_boolean_bits():
 
 def test_multi_bit_fields():
     """Test fields spanning multiple bits."""
+
     class MultiFlags(BitFieldModel):
         value: int = Bit(0, 1, 2)  # 3-bit value (0-7)
         flag: bool = Bit(3)
@@ -65,12 +69,13 @@ def test_multi_bit_fields():
 def test_bit_widths():
     """Test different bit widths (8, 16, 32)."""
     for width, max_val in [(8, 255), (16, 65535), (32, 4294967295)]:
+
         class DynamicFlags(BitFieldModel):
             value: int = Bit(0, 1, 2, 3)
             struct_config = StructConfig(bit_width=width)
 
         flags = DynamicFlags(value=0)
-        assert flags.struct_format_string == {8:'B', 16:'H', 32:'I'}[width]
+        assert flags.struct_format_string == {8: "B", 16: "H", 32: "I"}[width]
 
         # Test max value validation
         with pytest.raises(ValueError):
@@ -79,37 +84,38 @@ def test_bit_widths():
 
 def test_byte_order():
     """Test byte order handling."""
+
     class OrderFlags(BitFieldModel):
         value: int = Bit(0, 1, 2, 3)
-        struct_config = StructConfig(
-            bit_width=16,
-            byte_order=ByteOrder.BIG_ENDIAN
-        )
+        struct_config = StructConfig(bit_width=16, byte_order=ByteOrder.BIG_ENDIAN)
 
     # Test with bytes initialization
-    flags = OrderFlags(packed_value=b'\x01\x02')  # 0x0102 in big endian
+    flags = OrderFlags(packed_value=b"\x01\x02")  # 0x0102 in big endian
     assert flags.value == 2
 
-    flags = OrderFlags(packed_value=b'\x02\x01')  # Should interpret differently
+    flags = OrderFlags(packed_value=b"\x02\x01")  # Should interpret differently
     assert flags.value == 1
 
 
 def test_validation():
     """Test input validation."""
 
-    importlib.reload(sys.modules['pdc_struct'])
+    importlib.reload(sys.modules["pdc_struct"])
     # Test invalid bit width configuration
     try:
         print("Module is being imported")
+
         class InvalidWidth(BitFieldModel):
             x: bool = Bit(0)
             struct_config = StructConfig(bit_width=12)
-    except ValueError as e:
+
+    except ValueError:
         assert True
         # assert str(e) == 'bit_width must be 8, 16, or 32'
 
     # Test overlapping bits
     with pytest.raises(ValueError):
+
         class OverlapBits(BitFieldModel):
             a: int = Bit(0, 1)
             b: int = Bit(1, 2)  # Overlaps with 'a'
@@ -117,6 +123,7 @@ def test_validation():
 
 def test_bytes_initialization():
     """Test initialization from bytes."""
+
     class ByteFlags(BitFieldModel):
         read: bool = Bit(0)
         value: int = Bit(1, 2, 3)
@@ -127,12 +134,12 @@ def test_bytes_initialization():
     assert flags.packed_value == 0
 
     # Test bytes init
-    flags = ByteFlags(packed_value=b'\x0F')  # 0b00001111
+    flags = ByteFlags(packed_value=b"\x0f")  # 0b00001111
     assert flags.read
     assert flags.value == 7
 
     # Test kwargs override bytes
-    flags = ByteFlags(packed_value=b'\xFF', read=False)
+    flags = ByteFlags(packed_value=b"\xff", read=False)
     assert not flags.read
 
 
@@ -146,7 +153,7 @@ def test_clone():
         struct_config = StructConfig(bit_width=8)
 
     # Create original instance with some values
-    original = TestFlags(packed_value=b'\x07')  # 0b00000111 - read=1, write=1, value=1
+    original = TestFlags(packed_value=b"\x07")  # 0b00000111 - read=1, write=1, value=1
 
     # Test basic clone without changes
     clone1 = original.clone()
@@ -169,8 +176,7 @@ def test_bitfield_validation():
         x: float = Field(description="X coordinate")
         y: float = Field(description="Y coordinate")
         struct_config = StructConfig(
-            mode=StructMode.C_COMPATIBLE,
-            byte_order=ByteOrder.LITTLE_ENDIAN
+            mode=StructMode.C_COMPATIBLE, byte_order=ByteOrder.LITTLE_ENDIAN
         )
 
     class DynamicCircle(StructModel):
@@ -179,17 +185,13 @@ def test_bitfield_validation():
         struct_config = StructConfig(
             mode=StructMode.DYNAMIC,
             byte_order=ByteOrder.LITTLE_ENDIAN,
-            propagate_byte_order=True
+            propagate_byte_order=True,
         )
 
     # Set center to something of the wrong type
-    dynamic_circle = DynamicCircle(
-        center=Point(x=1, y=1),
-        radius=5.0
-    )
+    dynamic_circle = DynamicCircle(center=Point(x=1, y=1), radius=5.0)
 
     dynamic_circle.center = "wrong type data"
 
     with pytest.raises(TypeError):
-        dynamic_packed = dynamic_circle.to_bytes()
-
+        dynamic_circle.to_bytes()

@@ -3,9 +3,12 @@
 Core type system for PDC Struct.
 Provides type handler registration and lookup functionality.
 """
-from typing import Any, Dict, Type, Optional
+from typing import TYPE_CHECKING, Any, Dict, Type, Optional
 from abc import ABC, ABCMeta, abstractmethod
 from pydantic import Field
+
+if TYPE_CHECKING:
+    from ..models.struct_config import StructConfig
 
 
 class TypeHandlerMeta(ABCMeta):
@@ -15,16 +18,16 @@ class TypeHandlerMeta(ABCMeta):
     """
 
     # Class variable to store the type-to-handler mapping
-    _handler_registry: Dict[Type, Type['TypeHandler']] = {}
+    _handler_registry: Dict[Type, Type["TypeHandler"]] = {}
 
     def __new__(mcs, name: str, bases: tuple, namespace: dict):
         # Create the handler class
         cls = super().__new__(mcs, name, bases, namespace)
 
         # Don't register the base class itself
-        if name != 'TypeHandler':
+        if name != "TypeHandler":
             # Register all types this handler can handle
-            if hasattr(cls, 'handled_types'):
+            if hasattr(cls, "handled_types"):
                 for python_type in cls.handled_types():
                     if python_type in mcs._handler_registry:
                         existing = mcs._handler_registry[python_type].__name__
@@ -36,7 +39,7 @@ class TypeHandlerMeta(ABCMeta):
         return cls
 
     @classmethod
-    def get_handler(mcs, python_type: Type) -> Type['TypeHandler']:
+    def get_handler(mcs, python_type: Type) -> Type["TypeHandler"]:
         """Get the handler for a specific type."""
         # Check for the exact type first
         handler = mcs._handler_registry.get(python_type)
@@ -51,10 +54,12 @@ class TypeHandlerMeta(ABCMeta):
         raise NotImplementedError(f"No handler registered for type: {python_type}")
 
     @classmethod
-    def register_handler(mcs, handler_cls: Type['TypeHandler']) -> None:
+    def register_handler(mcs, handler_cls: Type["TypeHandler"]) -> None:
         """Manually register a type handler."""
-        if not hasattr(handler_cls, 'handled_types'):
-            raise TypeError(f"Handler class {handler_cls.__name__} must implement handled_types()")
+        if not hasattr(handler_cls, "handled_types"):
+            raise TypeError(
+                f"Handler class {handler_cls.__name__} must implement handled_types()"
+            )
 
         for python_type in handler_cls.handled_types():
             if python_type in mcs._handler_registry:
@@ -100,21 +105,25 @@ class TypeHandler(ABC, metaclass=TypeHandlerMeta):
 
     @classmethod
     @abstractmethod
-    def pack(cls,
-             value: Any,
-             field: Optional[Field],
-             struct_config: Optional['StructConfig'] = None # noqa - ignore StructConfig to avoid a circular import
-             ) -> Any:
+    def pack(
+        cls,
+        value: Any,
+        field: Optional[Field],
+        struct_config: Optional[
+            "StructConfig"
+        ] = None,  # noqa - ignore StructConfig to avoid a circular import
+    ) -> Any:
         """Pack a value for struct.pack."""
         raise NotImplementedError
 
     @classmethod
     @abstractmethod
     def unpack(
-            cls,
-            value: Any, field: Optional[Field],
-            struct_config: Optional['StructConfig'] = None
-            ) -> Any:
+        cls,
+        value: Any,
+        field: Optional[Field],
+        struct_config: Optional["StructConfig"] = None,
+    ) -> Any:
         """Unpack a value from struct.unpack."""
         raise NotImplementedError
 
@@ -142,12 +151,14 @@ class TypeHandler(ABC, metaclass=TypeHandlerMeta):
         if cls.needs_length():  # New class method
             struct_length = cls._get_field_length_generic(field)
             if struct_length is None:
-                raise ValueError(f"Field requires length specification (max_length or struct_length)")
+                raise ValueError(
+                    "Field requires length specification (max_length or struct_length)"
+                )
 
             # Store validated length
             if not field.json_schema_extra:
                 field.json_schema_extra = {}
-            field.json_schema_extra['struct_length'] = struct_length
+            field.json_schema_extra["struct_length"] = struct_length
 
     @staticmethod
     def _get_field_length_generic(field) -> Optional[int]:
@@ -156,7 +167,7 @@ class TypeHandler(ABC, metaclass=TypeHandlerMeta):
 
         struct_length = None
         if field.json_schema_extra:
-            struct_length = field.json_schema_extra.get('struct_length')
+            struct_length = field.json_schema_extra.get("struct_length")
         print(f"Found struct_length: {struct_length}")
 
         if struct_length:
@@ -165,7 +176,7 @@ class TypeHandler(ABC, metaclass=TypeHandlerMeta):
         max_length = None
         if field.metadata:
             for constraint in field.metadata:
-                if hasattr(constraint, 'max_length'):
+                if hasattr(constraint, "max_length"):
                     max_length = constraint.max_length
                     break
         print(f"Found max_length: {max_length}")
