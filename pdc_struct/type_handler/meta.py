@@ -3,9 +3,12 @@
 Core type system for PDC Struct.
 Provides type handler registration and lookup functionality.
 """
-from typing import Any, Dict, Type, Optional
+from typing import TYPE_CHECKING, Any, Dict, Type, Optional
 from abc import ABC, ABCMeta, abstractmethod
 from pydantic import Field
+
+if TYPE_CHECKING:
+    from ..models.struct_config import StructConfig
 
 
 class TypeHandlerMeta(ABCMeta):
@@ -149,7 +152,7 @@ class TypeHandler(ABC, metaclass=TypeHandlerMeta):
             struct_length = cls._get_field_length_generic(field)
             if struct_length is None:
                 raise ValueError(
-                    f"Field requires length specification (max_length or struct_length)"
+                    "Field requires length specification (max_length or struct_length)"
                 )
 
             # Store validated length

@@ -2,9 +2,8 @@
 
 from typing import Optional
 
-import pydantic_core
 import pytest
-from pydantic import ValidationError, Field
+from pydantic import Field
 from pdc_struct import (
     BitFieldModel,
     StructConfig,
@@ -16,7 +15,6 @@ from pdc_struct import (
 import importlib
 import sys
 
-from pdc_struct.models import struct_config
 
 
 def test_basic_boolean_bits():
@@ -112,7 +110,7 @@ def test_validation():
             x: bool = Bit(0)
             struct_config = StructConfig(bit_width=12)
 
-    except ValueError as e:
+    except ValueError:
         assert True
         # assert str(e) == 'bit_width must be 8, 16, or 32'
 
@@ -197,4 +195,4 @@ def test_bitfield_validation():
     dynamic_circle.center = "wrong type data"
 
     with pytest.raises(TypeError):
-        dynamic_packed = dynamic_circle.to_bytes()
+        dynamic_circle.to_bytes()

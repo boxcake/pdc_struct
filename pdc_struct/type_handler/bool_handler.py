@@ -1,10 +1,13 @@
 """Boolean type handler for PDC Struct."""
 
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
 from pydantic import Field
 
 from .meta import TypeHandler
+
+if TYPE_CHECKING:
+    from ..models.struct_config import StructConfig
 
 
 class BoolHandler(TypeHandler):

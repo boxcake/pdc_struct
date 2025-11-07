@@ -1,11 +1,14 @@
 """Integer type handler for PDC Struct. Handles native Int, and pdc_struct C fixed int types."""
 
-from typing import Optional, Any
+from typing import TYPE_CHECKING, Optional, Any
 
 from pydantic import Field
 
 from .meta import TypeHandler
 from ..c_types import Int8, UInt8, Int16, UInt16
+
+if TYPE_CHECKING:
+    from ..models.struct_config import StructConfig
 
 
 class IntHandler(TypeHandler):

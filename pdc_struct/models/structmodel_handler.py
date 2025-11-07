@@ -2,13 +2,16 @@
 
 # This must live outside the type_handler package to avoid a circular import
 
-from typing import Optional, Union, get_args
+from typing import TYPE_CHECKING, Optional, Union, get_args
 
 from pydantic import Field
 
 from .struct_model import StructModel, StructMode
 from ..type_handler.meta import TypeHandler
 from ..types import is_optional_type
+
+if TYPE_CHECKING:
+    from .struct_config import StructConfig
 
 
 class StructModelHandler(TypeHandler):

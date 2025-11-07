@@ -1,13 +1,10 @@
 """tests/test_bytes_endianness.py:"""
 
-import pytest
-import struct
 from pydantic import Field
 from pdc_struct import (
     StructModel,
     StructMode,
     StructConfig,
-    StructVersion,
     ByteOrder,
 )
 

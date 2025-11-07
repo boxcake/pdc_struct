@@ -1,13 +1,8 @@
 from typing import Optional
 
-import pytest
 from pydantic import Field
 from pdc_struct import (
     StructModel,
-    StructPackError,
-    StructUnpackError,
-    StructVersion,
-    HeaderFlags,
     StructConfig,
     ByteOrder,
     StructMode,
@@ -153,7 +148,6 @@ def test_dynamic_mode_nested_structs():
     assert dynamic_recovered_none.radius == 5.0
 
     # Test 6: Verify byte patterns
-    import struct
 
     # Create a point with known values that will have different
     # byte patterns in different endianness
@@ -165,6 +159,3 @@ def test_dynamic_mode_nested_structs():
 
     # These should be different
     assert le_bytes != be_bytes, "Little and big endian representations should differ"
-
-    # Verify the actual byte patterns match what we expect
-    le_expected = str

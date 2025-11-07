@@ -1,8 +1,11 @@
 # types.py
 """Type utilities for pdc_struct"""
 
-from typing import TypeVar, Union
+from typing import TYPE_CHECKING, TypeVar, Union
 from .exc import StructPackError
+
+if TYPE_CHECKING:
+    from .models.struct_model import StructModel
 
 # Define TypeVar for return type hints
 T = TypeVar("T", bound="StructModel")
@@ -41,7 +44,7 @@ def unwrap_optional_type(python_type):
     if not is_optional_type(python_type):
         return python_type
     # Get the non-None type from the Union
-    return next(arg for arg in python_type.__args__ if arg != type(None))
+    return next(arg for arg in python_type.__args__ if arg is not type(None))
 
 
 def validate_field_type(field_name: str, python_type) -> None:

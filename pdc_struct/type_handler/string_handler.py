@@ -1,10 +1,13 @@
 """Handler for string packing/unpacking"""
 
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 from pydantic import Field
 
 from pdc_struct.enums import StructMode
 from .meta import TypeHandler
+
+if TYPE_CHECKING:
+    from ..models.struct_config import StructConfig
 
 
 class StringHandler(TypeHandler):

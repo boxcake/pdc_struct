@@ -6,8 +6,6 @@ import pytest
 from pydantic import Field
 from pdc_struct import (
     StructModel,
-    StructPackError,
-    StructUnpackError,
     StructVersion,
     HeaderFlags,
     StructConfig,
@@ -203,6 +201,7 @@ def test_all_optional_none_set(optional_fields_model_all_unset):
     """A model with all optional fields set to None"""
     m = optional_fields_model_all_unset.to_bytes()
     n = type(optional_fields_model_all_unset).from_bytes(m)
+    assert n == optional_fields_model_all_unset
 
 
 def test_optional_fields_c_mode():

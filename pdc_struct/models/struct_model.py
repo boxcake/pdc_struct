@@ -90,7 +90,7 @@ class StructModel(BaseModel):
             except ValueError as e:
                 raise ValueError(f"Field '{field_name}': {e}")
 
-    def clone(self, **field_updates) -> "StructMoel":
+    def clone(self, **field_updates) -> "StructModel":
         """Create a new instance with the same packed value but optionally override specific fields.
 
         Args:

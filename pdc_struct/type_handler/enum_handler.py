@@ -1,10 +1,13 @@
 """Enum type handler for PDC Struct."""
 
 from enum import Enum, IntEnum, StrEnum
-from typing import Optional, Union
+from typing import TYPE_CHECKING, Optional, Union
 from pydantic import Field
 
 from .meta import TypeHandler
+
+if TYPE_CHECKING:
+    from ..models.struct_config import StructConfig
 
 
 class EnumHandler(TypeHandler):

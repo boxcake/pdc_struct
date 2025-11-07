@@ -14,6 +14,7 @@ from .uuid_handler import UUIDHandler
 __all__ = [
     "TypeHandler",
     "TypeHandlerMeta",
+    "BitFieldHandler",
     "BoolHandler",
     "BytesHandler",
     "EnumHandler",

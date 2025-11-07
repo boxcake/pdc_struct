@@ -1,11 +1,14 @@
 """UUID type handler for PDC Struct."""
 
 from uuid import UUID
-from typing import Optional, Union
+from typing import TYPE_CHECKING, Optional, Union
 from pydantic import Field
 
 from .meta import TypeHandler
 from pdc_struct.enums import ByteOrder
+
+if TYPE_CHECKING:
+    from ..models.struct_config import StructConfig
 
 
 class UUIDHandler(TypeHandler):
