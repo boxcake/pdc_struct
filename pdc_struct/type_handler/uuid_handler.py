@@ -1,4 +1,5 @@
 """UUID type handler for PDC Struct."""
+
 from uuid import UUID
 from typing import Optional, Union
 from pydantic import Field
@@ -16,35 +17,46 @@ class UUIDHandler(TypeHandler):
 
     @classmethod
     def get_struct_format(cls, field) -> str:
-        return '16s'
+        return "16s"
 
     @classmethod
     def pack(
-            cls,
-            value: UUID,
-            field: Optional[Field] = None,
-            struct_config: Optional['StructConfig'] = None      # noqa
+        cls,
+        value: UUID,
+        field: Optional[Field] = None,
+        struct_config: Optional["StructConfig"] = None,  # noqa
     ) -> Union[bytes, None]:
         """Pack UUID to bytes with proper endianness."""
         if value is None:
             return None
 
-        if not field or not hasattr(field, 'struct_config'):
+        if not field or not hasattr(field, "struct_config"):
             return value.bytes  # Default to big endian
 
         # Use bytes_le for little endian, bytes for big endian
-        return value.bytes_le if field.struct_config.byte_order == ByteOrder.LITTLE_ENDIAN else value.bytes
+        return (
+            value.bytes_le
+            if field.struct_config.byte_order == ByteOrder.LITTLE_ENDIAN
+            else value.bytes
+        )
 
     @classmethod
-    def unpack(cls,
-               value: bytes,
-               field: Optional[Field] = None,
-               struct_config: Optional['StructConfig'] = None
-               ) -> Union[UUID, None]:
+    def unpack(
+        cls,
+        value: bytes,
+        field: Optional[Field] = None,
+        struct_config: Optional["StructConfig"] = None,
+    ) -> Union[UUID, None]:
         """Unpack bytes into UUID with proper endianness."""
 
-        if not field or not hasattr(field, 'struct_config'):
+        if not field or not hasattr(field, "struct_config"):
             return UUID(bytes=value)  # Default to big endian
 
         # Use bytes_le for little endian, bytes for big endian
-        return UUID(bytes_le=value if field.struct_config.byte_order == ByteOrder.LITTLE_ENDIAN else UUID(bytes=value))
+        return UUID(
+            bytes_le=(
+                value
+                if field.struct_config.byte_order == ByteOrder.LITTLE_ENDIAN
+                else UUID(bytes=value)
+            )
+        )

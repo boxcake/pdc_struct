@@ -1,4 +1,5 @@
 """Bytes type handler for PDC Struct."""
+
 from typing import Optional, Union
 
 from pydantic import Field
@@ -22,14 +23,14 @@ class BytesHandler(TypeHandler):
     def get_struct_format(cls, field) -> str:
         # struct_length should never be None here because validate_field would have failed
         struct_length = cls._get_field_length_generic(field)
-        return f'{struct_length}s'
+        return f"{struct_length}s"
 
     @classmethod
     def pack(
-            cls,
-            value: bytes,
-            field: Optional[Field] = None,
-            struct_config: Optional['StructConfig'] = None      # noqa
+        cls,
+        value: bytes,
+        field: Optional[Field] = None,
+        struct_config: Optional["StructConfig"] = None,  # noqa
     ) -> bytes:
         """Pack bytes/bytearray with proper endianness.
 
@@ -58,10 +59,10 @@ class BytesHandler(TypeHandler):
 
     @classmethod
     def unpack(
-            cls,
-            value: bytes,
-            field: Optional[Field] = None,
-            struct_config: Optional['StructConfig'] = None  # noqa
+        cls,
+        value: bytes,
+        field: Optional[Field] = None,
+        struct_config: Optional["StructConfig"] = None,  # noqa
     ) -> Union[bytes, None]:
         """Unpack bytes with proper endianness.
 

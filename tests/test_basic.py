@@ -1,4 +1,4 @@
-""" tests/test_basic.py: Basic functionality tests """
+"""tests/test_basic.py: Basic functionality tests"""
 
 import pytest
 import struct
@@ -10,6 +10,7 @@ from pdc_struct import (
     StructVersion,
     ByteOrder,
 )
+
 
 def test_dynamic_roundtrip(dynamic_model):
     """Test basic round-trip serialization in DYNAMIC mode."""
@@ -35,7 +36,8 @@ def test_c_compatible_roundtrip(c_compatible_model):
 
 def test_string_field_length():
     """Test string field length validation during model creation."""
-    with pytest.raises(ValueError,match="Field requires length specification"):
+    with pytest.raises(ValueError, match="Field requires length specification"):
+
         class InvalidModel(StructModel):
             invalid_string: str = Field(description="String without max_length")
             struct_config = StructConfig(mode=StructMode.DYNAMIC)
@@ -77,31 +79,31 @@ def test_c_compatible_no_header(c_compatible_model):
 
 def test_invalid_string_length_dynamic():
     """Test string truncation in DYNAMIC mode."""
+
     class DynamicModel(StructModel):
         """Test model in DYNAMIC mode"""
+
         int_field: int = Field(description="Integer field")
         float_field: float = Field(description="Float field")
         string_field: str = Field(
-            max_length=30,
-            struct_length=10,
-            description="String field"
+            max_length=30, struct_length=10, description="String field"
         )
         bool_field: bool = Field(description="Boolean field")
 
         struct_config = StructConfig(
             mode=StructMode.DYNAMIC,
             version=StructVersion.V1,
-            byte_order=ByteOrder.LITTLE_ENDIAN
+            byte_order=ByteOrder.LITTLE_ENDIAN,
         )
 
     model = DynamicModel(
         int_field=42,
         float_field=3.14,
         string_field="this string is way too long",
-        bool_field=True
+        bool_field=True,
     )
 
-    assert model.struct_format_string() == '<id10s?'
+    assert model.struct_format_string() == "<id10s?"
     data = model.to_bytes()
     recovered = type(model).from_bytes(data)
 
@@ -116,29 +118,30 @@ def test_string_handling_c_compatible():
     - String length vs struct length handling
     - Mixed initialization methods
     """
+
     class StringModel(StructModel):
         ascii_field: str = Field(
-            default=None,          # Allow None initially
-            max_length=10,         # Max 10 characters
-            struct_length=11,      # 10 bytes + null terminator (sufficient for ASCII)
-            description="Field for ASCII strings"
+            default=None,  # Allow None initially
+            max_length=10,  # Max 10 characters
+            struct_length=11,  # 10 bytes + null terminator (sufficient for ASCII)
+            description="Field for ASCII strings",
         )
         unicode_field: str = Field(
-            default=None,          # Allow None initially
-            max_length=5,          # Max 5 characters
-            struct_length=21,      # Space for 5 4-byte chars + null terminator
-            description="Field for Unicode strings"
+            default=None,  # Allow None initially
+            max_length=5,  # Max 5 characters
+            struct_length=21,  # Space for 5 4-byte chars + null terminator
+            description="Field for Unicode strings",
         )
         struct_config = StructConfig(
             mode=StructMode.C_COMPATIBLE,
             version=StructVersion.V1,
-            byte_order=ByteOrder.LITTLE_ENDIAN
+            byte_order=ByteOrder.LITTLE_ENDIAN,
         )
 
     # Test ASCII strings
     model = StringModel(
         ascii_field="Hello Test",  # 9 ASCII chars
-        unicode_field="Hello"      # 5 ASCII chars
+        unicode_field="Hello",  # 5 ASCII chars
     )
     packed = model.to_bytes()
     recovered = StringModel.from_bytes(packed)
@@ -148,7 +151,7 @@ def test_string_handling_c_compatible():
     # Test Unicode strings with multi-byte characters
     model = StringModel(
         ascii_field="ASCII",
-        unicode_field="日本語"    # 3 Japanese characters, each 3 bytes in UTF-8
+        unicode_field="日本語",  # 3 Japanese characters, each 3 bytes in UTF-8
     )
     packed = model.to_bytes()
     recovered = StringModel.from_bytes(packed)
@@ -157,8 +160,7 @@ def test_string_handling_c_compatible():
 
     # Test mixed ASCII and Unicode
     model = StringModel(
-        ascii_field="Hi!",
-        unicode_field="Hi 🌍"     # ASCII + emoji (emoji is 4 bytes)
+        ascii_field="Hi!", unicode_field="Hi 🌍"  # ASCII + emoji (emoji is 4 bytes)
     )
     packed = model.to_bytes()
     recovered = StringModel.from_bytes(packed)

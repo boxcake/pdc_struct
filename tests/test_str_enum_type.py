@@ -1,4 +1,5 @@
 """Test string enum support in PDC Struct."""
+
 from enum import StrEnum
 import pytest
 from pydantic import Field
@@ -20,22 +21,19 @@ class Status(StrEnum):
 
 class ColorModel(StructModel):
     """Model using StrEnum."""
+
     color: Color
     status: Optional[Status] = Status.ACTIVE
     name: str = Field(max_length=10)
 
     struct_config = StructConfig(
-        mode=StructMode.C_COMPATIBLE,
-        byte_order=ByteOrder.LITTLE_ENDIAN
+        mode=StructMode.C_COMPATIBLE, byte_order=ByteOrder.LITTLE_ENDIAN
     )
 
 
 def test_str_enum_basic():
     """Test basic StrEnum packing and unpacking."""
-    model = ColorModel(
-        color=Color.RED,
-        name="test"
-    )
+    model = ColorModel(color=Color.RED, name="test")
 
     data = model.to_bytes()
     recovered = ColorModel.from_bytes(data)
@@ -50,10 +48,7 @@ def test_str_enum_basic():
 def test_str_enum_all_values():
     """Test all string enum values can be packed and unpacked."""
     for color in Color:
-        model = ColorModel(
-            color=color,
-            name="test"
-        )
+        model = ColorModel(color=color, name="test")
         data = model.to_bytes()
         recovered = ColorModel.from_bytes(data)
         assert recovered.color == color
@@ -68,15 +63,11 @@ def test_str_enum_dynamic_mode():
         status: Optional[Status] = None
 
         struct_config = StructConfig(
-            mode=StructMode.DYNAMIC,
-            byte_order=ByteOrder.LITTLE_ENDIAN
+            mode=StructMode.DYNAMIC, byte_order=ByteOrder.LITTLE_ENDIAN
         )
 
     # Test with values
-    model = DynamicModel(
-        color=Color.BLUE,
-        status=Status.MAINTENANCE
-    )
+    model = DynamicModel(color=Color.BLUE, status=Status.MAINTENANCE)
     data = model.to_bytes()
     recovered = DynamicModel.from_bytes(data)
     assert recovered.color == Color.BLUE
@@ -94,15 +85,13 @@ def test_str_enum_dynamic_mode():
 
 def test_invalid_str_enum_value():
     """Test handling of invalid string enum indices."""
-    model = ColorModel(
-        color=Color.RED,
-        name="test"
-    )
+    model = ColorModel(color=Color.RED, name="test")
     data = model.to_bytes()
 
     # Modify the first integer to an invalid index
     import struct
-    format_str = '<ii10s'  # assuming this is the format string
+
+    format_str = "<ii10s"  # assuming this is the format string
     invalid_index = 99
     _, status, name = struct.unpack(format_str, data)
     invalid_data = struct.pack(format_str, invalid_index, status, name)

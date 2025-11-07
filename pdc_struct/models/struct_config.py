@@ -3,11 +3,7 @@
 from sys import byteorder as system_byte_order
 from typing import Dict, Any, Optional
 
-from pdc_struct.enums import (
-    StructVersion,
-    ByteOrder,
-    StructMode
-)
+from pdc_struct.enums import StructVersion, ByteOrder, StructMode
 
 
 class StructConfig:
@@ -22,14 +18,19 @@ class StructConfig:
             bit_width=8
         )
     """
+
     def __init__(
         self,
         mode: StructMode = StructMode.DYNAMIC,
         version: StructVersion = StructVersion.V1,
-        byte_order: ByteOrder = ByteOrder.LITTLE_ENDIAN if system_byte_order == "little" else ByteOrder.BIG_ENDIAN,
+        byte_order: ByteOrder = (
+            ByteOrder.LITTLE_ENDIAN
+            if system_byte_order == "little"
+            else ByteOrder.BIG_ENDIAN
+        ),
         bit_width: Optional[int] = None,
         propagate_byte_order: bool = True,
-        metadata: Dict[str, Any] = None
+        metadata: Dict[str, Any] = None,
     ):
         self.mode = mode
         self.version = version

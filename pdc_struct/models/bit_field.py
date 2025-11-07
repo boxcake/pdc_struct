@@ -1,4 +1,5 @@
 """BitField implementation for PDC Struct."""
+
 from sys import byteorder as system_byte_order
 from typing import Dict, Set, ClassVar, Literal
 from dataclasses import dataclass
@@ -12,6 +13,7 @@ from .struct_config import StructConfig
 @dataclass
 class BitDefinition:
     """Definition of a single bit or bit-range."""
+
     start_bit: int
     num_bits: int = 1
     is_bool: bool = True  # True for single-bit fields, False for multi-bit int fields
@@ -40,28 +42,24 @@ def Bit(start_bit: int, *additional_bits: int, **kwargs) -> FieldInfo:  # noqa
             raise ValueError(f"Bit positions must be contiguous, got {bits}")
 
     # Store bit info in json_schema_extra
-    bit_info = {
-        'start_bit': start_bit,
-        'num_bits': num_bits,
-        'is_bool': is_bool
-    }
+    bit_info = {"start_bit": start_bit, "num_bits": num_bits, "is_bool": is_bool}
 
     # Get existing json_schema_extra or create new
-    json_schema_extra = kwargs.pop('json_schema_extra', {})
+    json_schema_extra = kwargs.pop("json_schema_extra", {})
     if isinstance(json_schema_extra, dict):
-        json_schema_extra['bit_info'] = bit_info
+        json_schema_extra["bit_info"] = bit_info
     else:
         raise ValueError("json_schema_extra must be a dict")
 
     # Default to False for bools, 0 for multi-bit fields
-    default = kwargs.pop('default', False if is_bool else 0)
+    default = kwargs.pop("default", False if is_bool else 0)
 
     field_params = {
-        'default': default,
+        "default": default,
         **kwargs,
-        'json_schema_extra': json_schema_extra,
-        'ge': 0 if not is_bool else None,
-        'lt': 1 << num_bits if not is_bool else None,
+        "json_schema_extra": json_schema_extra,
+        "ge": 0 if not is_bool else None,
+        "lt": 1 << num_bits if not is_bool else None,
     }
 
     return Field(**field_params)
@@ -95,25 +93,29 @@ class BitFieldModel(BaseModel):
 
     struct_config: ClassVar[StructConfig] = StructConfig()
     _bit_definitions: ClassVar[Dict[str, BitDefinition]] = {}
-    _struct_format: ClassVar[str] = "B"  # Default to byte, updated in __pydantic_init_subclass__
+    _struct_format: ClassVar[str] = (
+        "B"  # Default to byte, updated in __pydantic_init_subclass__
+    )
 
     def __init__(self, **data):
-        if 'packed_value' in data:
-            packed_value = data.pop('packed_value')
+        if "packed_value" in data:
+            packed_value = data.pop("packed_value")
 
             # Process packed_value to integer
             if isinstance(packed_value, bytes):
                 # Process bit sequence to field values
-                byte_order: Literal['little', 'big'] = system_byte_order
+                byte_order: Literal["little", "big"] = system_byte_order
                 if self.struct_config.byte_order is ByteOrder.LITTLE_ENDIAN:
-                    byte_order = 'little'
+                    byte_order = "little"
                 elif self.struct_config.byte_order is ByteOrder.BIG_ENDIAN:
-                    byte_order = 'big'
+                    byte_order = "big"
                 value = int.from_bytes(packed_value, byteorder=byte_order)
             elif isinstance(packed_value, int):
                 value = packed_value
             else:
-                raise TypeError(f"packed_value must be bytes or int, not {type(packed_value)}")
+                raise TypeError(
+                    f"packed_value must be bytes or int, not {type(packed_value)}"
+                )
 
             # Convert raw value to field values
             field_values = {}
@@ -135,30 +137,26 @@ class BitFieldModel(BaseModel):
         super().__pydantic_init_subclass__(**kwargs)
 
         # Validate struct_config
-        if not hasattr(cls, 'struct_config'):
+        if not hasattr(cls, "struct_config"):
             raise ValueError("BitFieldStruct requires struct_config with bit_width")
 
         if cls.struct_config.bit_width not in (8, 16, 32):
             raise ValueError("bit_width must be 8, 16, or 32")
 
         # Set struct format based on bit width
-        cls._struct_format = {
-            8: 'B',
-            16: 'H',
-            32: 'I'
-        }[cls.struct_config.bit_width]
+        cls._struct_format = {8: "B", 16: "H", 32: "I"}[cls.struct_config.bit_width]
 
         # Initialize bit_definitions
         cls._bit_definitions = {}
 
         # Collect bit definitions from fields
         used_bits: Set[int] = set()
-        for name, field in cls.model_fields.items():    # noqa - property returns a dict
-            if field.json_schema_extra and 'bit_info' in field.json_schema_extra:
-                bit_info = field.json_schema_extra['bit_info']
-                start_bit = bit_info['start_bit']
-                num_bits = bit_info['num_bits']
-                is_bool = bit_info['is_bool']
+        for name, field in cls.model_fields.items():  # noqa - property returns a dict
+            if field.json_schema_extra and "bit_info" in field.json_schema_extra:
+                bit_info = field.json_schema_extra["bit_info"]
+                start_bit = bit_info["start_bit"]
+                num_bits = bit_info["num_bits"]
+                is_bool = bit_info["is_bool"]
 
                 bits = set(range(start_bit, start_bit + num_bits))
                 if bits & used_bits:
@@ -170,9 +168,7 @@ class BitFieldModel(BaseModel):
                 used_bits.update(bits)
 
                 cls._bit_definitions[name] = BitDefinition(
-                    start_bit=start_bit,
-                    num_bits=num_bits,
-                    is_bool=is_bool
+                    start_bit=start_bit, num_bits=num_bits, is_bool=is_bool
                 )
 
     @property
@@ -185,21 +181,25 @@ class BitFieldModel(BaseModel):
                 if not isinstance(attr_value, bool):
                     raise ValueError(f"Field {name} requires a boolean value")
                 if attr_value:
-                    value |= (1 << bit_def.start_bit)
+                    value |= 1 << bit_def.start_bit
             else:
                 if not isinstance(attr_value, int):
                     raise ValueError(f"Field {name} requires an integer value")
                 max_val = (1 << bit_def.num_bits) - 1
                 if not 0 <= attr_value <= max_val:
-                    raise ValueError(f"Field {name} value {attr_value} out of range (0-{max_val})")
-                value |= (attr_value << bit_def.start_bit)
+                    raise ValueError(
+                        f"Field {name} value {attr_value} out of range (0-{max_val})"
+                    )
+                value |= attr_value << bit_def.start_bit
         return value
 
     @packed_value.setter
     def packed_value(self, value: int):
         max_value = (1 << self.struct_config.bit_width) - 1
         if not 0 <= value <= max_value:
-            raise ValueError(f"Value {value} out of range for {self.struct_config.bit_width} bits")
+            raise ValueError(
+                f"Value {value} out of range for {self.struct_config.bit_width} bits"
+            )
 
         for name, bit_def in self._bit_definitions.items():
             if bit_def.is_bool:
@@ -210,7 +210,7 @@ class BitFieldModel(BaseModel):
 
             self.__pydantic_validator__.validate_assignment(self, name, value_to_set)
 
-    def clone(self, **field_updates) -> 'BitFieldModel':
+    def clone(self, **field_updates) -> "BitFieldModel":
         """Create a new instance with the same packed value but optionally override specific fields.
 
         Args:
@@ -221,7 +221,7 @@ class BitFieldModel(BaseModel):
             A new instance of the same class with the specified updates applied.
 
         Examples:
-            >>> flags = ByteFlags(packed_value=b'\xFF')  # all bits set
+            >>> flags = ByteFlags(packed_value=b'\xff')  # all bits set
             >>> new_flags = flags.clone(read=False)  # copy state but clear read bit
         """
         return self.__class__(packed_value=self.packed_value, **field_updates)
