@@ -26,7 +26,7 @@ pip install git+https://github.com/boxcake/pdc_struct.git
 ```
 
 **Requirements**:
-- Python 3.10+
+- Python 3.11+
 - Pydantic 2.0+
 
 ## Quick Start
