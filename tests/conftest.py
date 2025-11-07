@@ -1,6 +1,5 @@
 """tests/conftest.py PyTest test fixtures"""
 
-import builtins
 
 import pytest
 from typing import Optional

@@ -1,10 +1,13 @@
 """IP address type handler for PDC Struct."""
 
 from ipaddress import IPv4Address, IPv6Address
-from typing import Any, Optional, Union
+from typing import TYPE_CHECKING, Any, Optional, Union
 from pydantic import Field
 
 from .meta import TypeHandler
+
+if TYPE_CHECKING:
+    from ..models.struct_config import StructConfig
 
 
 class IPAddressHandler(TypeHandler):

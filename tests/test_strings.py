@@ -7,7 +7,6 @@ from pdc_struct import (
     StructConfig,
     ByteOrder,
     StructVersion,
-    StructPackError,
     StructMode,
 )
 
@@ -46,7 +45,6 @@ def test_short_string_padding():
     data = model.to_bytes()
 
     # Check the actual bytes to verify padding
-    format_str = model.struct_format_string()
     recovered = StringTestModel.from_bytes(data)
 
     # Should be padded with nulls but stripped on recovery
@@ -119,7 +117,7 @@ def test_utf8_truncation():
     data = model.to_bytes()
 
     with pytest.raises(UnicodeDecodeError, match="can't decode bytes in position 8-9"):
-        recovered = StringTestModel.from_bytes(data)
+        StringTestModel.from_bytes(data)
 
     # ToDo: We could fix this behavior in the encoder and force truncation at a character boundary
     # # Should truncate at character boundary

@@ -1,9 +1,12 @@
 # utils.py
 """Utility functions for pdc_struct"""
 
-from typing import Tuple, Type
+from typing import TYPE_CHECKING, Tuple, Type
 from .types import is_optional_type
 from .exc import StructUnpackError
+
+if TYPE_CHECKING:
+    from .models.struct_model import StructModel
 
 
 def create_field_bitmap(model: "StructModel") -> Tuple[bytes, list]:

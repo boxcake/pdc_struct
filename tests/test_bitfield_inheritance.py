@@ -1,19 +1,11 @@
 """Test BitFieldModel functionality."""
 
-from typing import Optional
 
-import pytest
-from pydantic import ValidationError, Field
 from pdc_struct import (
     BitFieldModel,
     StructConfig,
-    StructMode,
-    ByteOrder,
     Bit,
-    StructModel,
 )
-import importlib
-import sys
 
 
 def test_bitfield_inheritance():

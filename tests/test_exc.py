@@ -8,7 +8,6 @@ import pytest
 from pydantic import Field
 from pdc_struct import (
     StructModel,
-    StructPackError,
     StructUnpackError,
     StructConfig,
     StructMode,

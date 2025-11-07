@@ -27,9 +27,9 @@ except PackageNotFoundError:
     )
 
 # Internal imports
-from .exc import StructPackError, StructUnpackError
-from .enums import StructVersion, ByteOrder, HeaderFlags, StructMode
-from .models import (
+from .exc import StructPackError, StructUnpackError  # noqa: E402
+from .enums import StructVersion, ByteOrder, HeaderFlags, StructMode  # noqa: E402
+from .models import (  # noqa: E402
     StructConfig,
     StructModel,
     BitFieldModel,
