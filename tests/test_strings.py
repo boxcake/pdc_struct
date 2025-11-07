@@ -7,12 +7,14 @@ from pdc_struct import (
     StructConfig,
     ByteOrder,
     StructVersion,
-    StructPackError, StructMode,
+    StructPackError,
+    StructMode,
 )
 
 
 class StringTestModel(StructModel):
     """Model for testing various string scenarios"""
+
     exact_str: str = Field(max_length=20, description="Field for exact length testing")
     short_str: str = Field(max_length=20, description="Field for short string testing")
     utf8_str: str = Field(max_length=20, description="Field for UTF-8 testing")
@@ -20,16 +22,14 @@ class StringTestModel(StructModel):
     struct_config = StructConfig(
         mode=StructMode.DYNAMIC,
         version=StructVersion.V1,
-        byte_order=ByteOrder.LITTLE_ENDIAN
+        byte_order=ByteOrder.LITTLE_ENDIAN,
     )
 
 
 def test_exact_length_string():
     """Test string that exactly matches max_length."""
     model = StringTestModel(
-        exact_str="abcdefghij",  # Exactly 10 chars
-        short_str="short",
-        utf8_str="test"
+        exact_str="abcdefghij", short_str="short", utf8_str="test"  # Exactly 10 chars
     )
 
     data = model.to_bytes()
@@ -41,11 +41,7 @@ def test_exact_length_string():
 
 def test_short_string_padding():
     """Test string shorter than max_length is properly padded."""
-    model = StringTestModel(
-        exact_str="test",
-        short_str="short",
-        utf8_str="test"
-    )
+    model = StringTestModel(exact_str="test", short_str="short", utf8_str="test")
 
     data = model.to_bytes()
 
@@ -56,7 +52,6 @@ def test_short_string_padding():
     # Should be padded with nulls but stripped on recovery
     assert len(recovered.exact_str) == 4
     assert recovered.exact_str == "test"
-
 
 
 # ToDo: Should C_COMPATIBLE mode should reproduce this behavior?
@@ -92,9 +87,7 @@ def test_utf8_string():
 
     for utf8_string in test_strings:
         model = StringTestModel(
-            exact_str="test",
-            short_str="short",
-            utf8_str=utf8_string
+            exact_str="test", short_str="short", utf8_str=utf8_string
         )
 
         data = model.to_bytes()
@@ -102,7 +95,7 @@ def test_utf8_string():
 
         # UTF-8 strings might be truncated if byte length > max_length
         # We should get either the full string or a valid UTF-8 prefix
-        assert recovered.utf8_str.encode('utf-8').decode('utf-8') == recovered.utf8_str
+        assert recovered.utf8_str.encode("utf-8").decode("utf-8") == recovered.utf8_str
 
 
 def test_utf8_truncation():
@@ -112,17 +105,16 @@ def test_utf8_truncation():
 
     class StringTestModel(StructModel):
         """Model for testing various string scenarios"""
+
         utf8_str: str = Field(max_length=10, description="Field for UTF-8 testing")
 
         struct_config = StructConfig(
             mode=StructMode.DYNAMIC,
             version=StructVersion.V1,
-            byte_order=ByteOrder.LITTLE_ENDIAN
+            byte_order=ByteOrder.LITTLE_ENDIAN,
         )
 
-    model = StringTestModel(
-        utf8_str=test_str
-    )
+    model = StringTestModel(utf8_str=test_str)
 
     data = model.to_bytes()
 
@@ -136,11 +128,7 @@ def test_utf8_truncation():
 
 def test_empty_string():
     """Test handling of empty strings."""
-    model = StringTestModel(
-        exact_str="",
-        short_str="",
-        utf8_str=""
-    )
+    model = StringTestModel(exact_str="", short_str="", utf8_str="")
 
     data = model.to_bytes()
     recovered = StringTestModel.from_bytes(data)
@@ -153,11 +141,7 @@ def test_empty_string():
 def test_string_control_characters():
     """Test handling of strings with control characters."""
     control_str = "test\n\r\tcontrol"
-    model = StringTestModel(
-        exact_str=control_str,
-        short_str="short",
-        utf8_str="test"
-    )
+    model = StringTestModel(exact_str=control_str, short_str="short", utf8_str="test")
 
     data = model.to_bytes()
     recovered = StringTestModel.from_bytes(data)

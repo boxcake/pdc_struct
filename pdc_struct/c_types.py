@@ -7,9 +7,10 @@ from pydantic_core import CoreSchema, core_schema
 
 class Int8(int):
     """8-bit signed integer (-128 to 127)."""
+
     _min_value: ClassVar[int] = -128
     _max_value: ClassVar[int] = 127
-    _struct_format: ClassVar[str] = 'b'
+    _struct_format: ClassVar[str] = "b"
 
     def __new__(cls, value: int):
         if not isinstance(value, (int, Int8)):
@@ -27,17 +28,15 @@ class Int8(int):
         _handler: Any,
     ) -> CoreSchema:
         """Pydantic validation schema."""
-        return core_schema.int_schema(
-            ge=cls._min_value,
-            le=cls._max_value
-        )
+        return core_schema.int_schema(ge=cls._min_value, le=cls._max_value)
 
 
 class UInt8(int):
     """8-bit unsigned integer (0 to 255)."""
+
     _min_value: ClassVar[int] = 0
     _max_value: ClassVar[int] = 255
-    _struct_format: ClassVar[str] = 'B'
+    _struct_format: ClassVar[str] = "B"
 
     def __new__(cls, value: int):
         if not isinstance(value, (int, UInt8)):
@@ -55,17 +54,15 @@ class UInt8(int):
         _handler: Any,
     ) -> CoreSchema:
         """Pydantic validation schema."""
-        return core_schema.int_schema(
-            ge=cls._min_value,
-            le=cls._max_value
-        )
+        return core_schema.int_schema(ge=cls._min_value, le=cls._max_value)
 
 
 class Int16(int):
     """16-bit signed integer (-32,768 to 32,767)."""
+
     _min_value: ClassVar[int] = -32768
     _max_value: ClassVar[int] = 32767
-    _struct_format: ClassVar[str] = 'h'
+    _struct_format: ClassVar[str] = "h"
 
     def __new__(cls, value: int):
         if not isinstance(value, (int, Int16)):
@@ -83,17 +80,15 @@ class Int16(int):
         _handler: Any,
     ) -> CoreSchema:
         """Pydantic validation schema."""
-        return core_schema.int_schema(
-            ge=cls._min_value,
-            le=cls._max_value
-        )
+        return core_schema.int_schema(ge=cls._min_value, le=cls._max_value)
 
 
 class UInt16(int):
     """16-bit unsigned integer (0 to 65,535)."""
+
     _min_value: ClassVar[int] = 0
     _max_value: ClassVar[int] = 65535
-    _struct_format: ClassVar[str] = 'H'
+    _struct_format: ClassVar[str] = "H"
 
     def __new__(cls, value: int):
         if not isinstance(value, (int, UInt16)):
@@ -111,7 +106,4 @@ class UInt16(int):
         _handler: Any,
     ) -> CoreSchema:
         """Pydantic validation schema."""
-        return core_schema.int_schema(
-            ge=cls._min_value,
-            le=cls._max_value
-        )
+        return core_schema.int_schema(ge=cls._min_value, le=cls._max_value)

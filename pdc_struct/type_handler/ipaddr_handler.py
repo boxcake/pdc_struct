@@ -1,4 +1,5 @@
 """IP address type handler for PDC Struct."""
+
 from ipaddress import IPv4Address, IPv6Address
 from typing import Any, Optional, Union
 from pydantic import Field
@@ -21,7 +22,7 @@ class IPAddressHandler(TypeHandler):
             ip_type = field.annotation.__args__[0]
 
         # IPv4 = 4 bytes, IPv6 = 16 bytes
-        return '4s' if ip_type == IPv4Address else '16s'
+        return "4s" if ip_type == IPv4Address else "16s"
 
     @classmethod
     def validate_field(cls, field) -> None:
@@ -40,11 +41,12 @@ class IPAddressHandler(TypeHandler):
             )
 
     @classmethod
-    def pack(cls,
-             value: Any,
-             field: Optional[Field] = None,
-             struct_config: Optional['StructConfig'] = None
-             ) -> Union[bytes, None]:
+    def pack(
+        cls,
+        value: Any,
+        field: Optional[Field] = None,
+        struct_config: Optional["StructConfig"] = None,
+    ) -> Union[bytes, None]:
         """Pack IP address to bytes.
 
         Always uses network byte order (big endian) as per IP standard.
@@ -54,11 +56,12 @@ class IPAddressHandler(TypeHandler):
         return value.packed
 
     @classmethod
-    def unpack(cls,
-               value: bytes,
-               field: Optional[Field] = None,
-               struct_config: Optional['StructConfig'] = None
-               ) -> Any:
+    def unpack(
+        cls,
+        value: bytes,
+        field: Optional[Field] = None,
+        struct_config: Optional["StructConfig"] = None,
+    ) -> Any:
         """Unpack bytes into IP address.
 
         Input bytes should be in network byte order (big endian).

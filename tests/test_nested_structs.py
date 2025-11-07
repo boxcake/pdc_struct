@@ -10,27 +10,25 @@ from pdc_struct import (
     HeaderFlags,
     StructConfig,
     ByteOrder,
-    StructMode
+    StructMode,
 )
 
-def test_nested_little_endian():
 
+def test_nested_little_endian():
     """Test nested struct serialization with various byte order configurations."""
 
     class Point(StructModel):
         x: float = Field(description="X coordinate")
         y: float = Field(description="Y coordinate")
         struct_config = StructConfig(
-            mode=StructMode.C_COMPATIBLE,
-            byte_order=ByteOrder.LITTLE_ENDIAN
+            mode=StructMode.C_COMPATIBLE, byte_order=ByteOrder.LITTLE_ENDIAN
         )
 
     class Circle(StructModel):
         center: Point = Field(description="Center point")
         radius: float = Field(description="Circle radius")
         struct_config = StructConfig(
-            mode=StructMode.C_COMPATIBLE,
-            byte_order=ByteOrder.LITTLE_ENDIAN
+            mode=StructMode.C_COMPATIBLE, byte_order=ByteOrder.LITTLE_ENDIAN
         )
 
     # Test 1: Basic nesting with system byte order (little endian)
@@ -41,6 +39,7 @@ def test_nested_little_endian():
     assert recovered.center.y == 2.0
     assert recovered.radius == 5.0
 
+
 def test_nested_explicit_big_endian():
 
     # Test 2: Explicit big endian for both parent and child
@@ -48,16 +47,14 @@ def test_nested_explicit_big_endian():
         x: float = Field(description="X coordinate")
         y: float = Field(description="Y coordinate")
         struct_config = StructConfig(
-            mode=StructMode.C_COMPATIBLE,
-            byte_order=ByteOrder.BIG_ENDIAN
+            mode=StructMode.C_COMPATIBLE, byte_order=ByteOrder.BIG_ENDIAN
         )
 
     class BigEndianCircle(StructModel):
         center: BigEndianPoint = Field(description="Center point")
         radius: float = Field(description="Circle radius")
         struct_config = StructConfig(
-            mode=StructMode.C_COMPATIBLE,
-            byte_order=ByteOrder.BIG_ENDIAN
+            mode=StructMode.C_COMPATIBLE, byte_order=ByteOrder.BIG_ENDIAN
         )
 
     be_circle = BigEndianCircle(center=BigEndianPoint(x=1.0, y=2.0), radius=5.0)
@@ -67,6 +64,7 @@ def test_nested_explicit_big_endian():
     assert be_recovered.center.y == 2.0
     assert be_recovered.radius == 5.0
 
+
 def test_mixed_endian_structs_no_propagation():
     # Test 3: Mixed endianness with propagation disabled
 
@@ -74,8 +72,7 @@ def test_mixed_endian_structs_no_propagation():
         x: float = Field(description="X coordinate")
         y: float = Field(description="Y coordinate")
         struct_config = StructConfig(
-            mode=StructMode.C_COMPATIBLE,
-            byte_order=ByteOrder.BIG_ENDIAN
+            mode=StructMode.C_COMPATIBLE, byte_order=ByteOrder.BIG_ENDIAN
         )
 
     class MixedCircle(StructModel):
@@ -85,18 +82,16 @@ def test_mixed_endian_structs_no_propagation():
         struct_config = StructConfig(
             mode=StructMode.C_COMPATIBLE,
             byte_order=ByteOrder.LITTLE_ENDIAN,
-            propagate_byte_order=False  # Don't override child's endianness
+            propagate_byte_order=False,  # Don't override child's endianness
         )
 
-    mixed_circle = MixedCircle(
-        center=BigEndianPoint(x=1.0, y=2.0),
-        radius=5.0
-    )
+    mixed_circle = MixedCircle(center=BigEndianPoint(x=1.0, y=2.0), radius=5.0)
     mixed_packed = mixed_circle.to_bytes()
     mixed_recovered = MixedCircle.from_bytes(mixed_packed)
     assert mixed_recovered.center.x == 1.0
     assert mixed_recovered.center.y == 2.0
     assert mixed_recovered.radius == 5.0
+
 
 def test_nested_mixed_endian_structs_with_propagation():
     # Test 4: Mixed endianness with propagation enabled
@@ -104,8 +99,7 @@ def test_nested_mixed_endian_structs_with_propagation():
         x: float = Field(description="X coordinate")
         y: float = Field(description="Y coordinate")
         struct_config = StructConfig(
-            mode=StructMode.C_COMPATIBLE,
-            byte_order=ByteOrder.BIG_ENDIAN
+            mode=StructMode.C_COMPATIBLE, byte_order=ByteOrder.BIG_ENDIAN
         )
 
     class PropagatingCircle(StructModel):
@@ -114,18 +108,16 @@ def test_nested_mixed_endian_structs_with_propagation():
         struct_config = StructConfig(
             mode=StructMode.C_COMPATIBLE,
             byte_order=ByteOrder.LITTLE_ENDIAN,
-            propagate_byte_order=True  # Override child's endianness
+            propagate_byte_order=True,  # Override child's endianness
         )
 
-    prop_circle = PropagatingCircle(
-        center=BigEndianPoint(x=1.0, y=2.0),
-        radius=5.0
-    )
+    prop_circle = PropagatingCircle(center=BigEndianPoint(x=1.0, y=2.0), radius=5.0)
     prop_packed = prop_circle.to_bytes()
     prop_recovered = PropagatingCircle.from_bytes(prop_packed)
     assert prop_recovered.center.x == 1.0
     assert prop_recovered.center.y == 2.0
     assert prop_recovered.radius == 5.0
+
 
 def test_dynamic_mode_nested_structs():
     # Test 5: Dynamic mode with nested structs
@@ -133,8 +125,7 @@ def test_dynamic_mode_nested_structs():
         x: float = Field(description="X coordinate")
         y: float = Field(description="Y coordinate")
         struct_config = StructConfig(
-            mode=StructMode.C_COMPATIBLE,
-            byte_order=ByteOrder.LITTLE_ENDIAN
+            mode=StructMode.C_COMPATIBLE, byte_order=ByteOrder.LITTLE_ENDIAN
         )
 
     class DynamicCircle(StructModel):
@@ -143,14 +134,11 @@ def test_dynamic_mode_nested_structs():
         struct_config = StructConfig(
             mode=StructMode.DYNAMIC,
             byte_order=ByteOrder.LITTLE_ENDIAN,
-            propagate_byte_order=True
+            propagate_byte_order=True,
         )
 
     # Test with present optional field
-    dynamic_circle = DynamicCircle(
-        center=Point(x=1.0, y=2.0),
-        radius=5.0
-    )
+    dynamic_circle = DynamicCircle(center=Point(x=1.0, y=2.0), radius=5.0)
     dynamic_packed = dynamic_circle.to_bytes()
     dynamic_recovered = DynamicCircle.from_bytes(dynamic_packed)
     assert dynamic_recovered.center.x == 1.0
@@ -166,6 +154,7 @@ def test_dynamic_mode_nested_structs():
 
     # Test 6: Verify byte patterns
     import struct
+
     # Create a point with known values that will have different
     # byte patterns in different endianness
     test_point = Point(x=1.0, y=2.0)

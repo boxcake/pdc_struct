@@ -12,14 +12,14 @@ from .string_handler import StringHandler
 from .uuid_handler import UUIDHandler
 
 __all__ = [
-    'TypeHandler',
-    'TypeHandlerMeta',
-    'BoolHandler',
-    'BytesHandler',
-    'EnumHandler',
-    'FloatHandler',
-    'IntHandler',
-    'IPAddressHandler',
-    'StringHandler',
-    'UUIDHandler'
+    "TypeHandler",
+    "TypeHandlerMeta",
+    "BoolHandler",
+    "BytesHandler",
+    "EnumHandler",
+    "FloatHandler",
+    "IntHandler",
+    "IPAddressHandler",
+    "StringHandler",
+    "UUIDHandler",
 ]

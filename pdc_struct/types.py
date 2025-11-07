@@ -5,7 +5,7 @@ from typing import TypeVar, Union
 from .exc import StructPackError
 
 # Define TypeVar for return type hints
-T = TypeVar('T', bound='StructModel')
+T = TypeVar("T", bound="StructModel")
 
 
 def is_optional_type(python_type) -> bool:

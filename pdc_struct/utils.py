@@ -6,7 +6,7 @@ from .types import is_optional_type
 from .exc import StructUnpackError
 
 
-def create_field_bitmap(model: 'StructModel') -> Tuple[bytes, list]:
+def create_field_bitmap(model: "StructModel") -> Tuple[bytes, list]:
     """Create a bitmap of present optional fields in a model instance.
 
     Generates a bitmap indicating which optional fields are present in the model,
@@ -44,8 +44,11 @@ def create_field_bitmap(model: 'StructModel') -> Tuple[bytes, list]:
     bitmap[0] = num_bytes  # First byte is length
 
     # Track which fields are present
-    present_fields = [name for name, field in model.model_fields.items()
-                     if not is_optional_type(field.annotation)]
+    present_fields = [
+        name
+        for name, field in model.model_fields.items()
+        if not is_optional_type(field.annotation)
+    ]
 
     # Set bits for present optional fields
     for i, (name, field) in enumerate(optional_fields):
@@ -53,13 +56,15 @@ def create_field_bitmap(model: 'StructModel') -> Tuple[bytes, list]:
         bit_index = i % 8
         value = getattr(model, name, None)
         if value is not None:
-            bitmap[byte_index] |= (1 << bit_index)
+            bitmap[byte_index] |= 1 << bit_index
             present_fields.append(name)
 
     return bytes(bitmap), present_fields
 
 
-def parse_field_bitmap(data: bytes, model_cls: Type['StructModel']) -> Tuple[bytes, list]:
+def parse_field_bitmap(
+    data: bytes, model_cls: Type["StructModel"]
+) -> Tuple[bytes, list]:
     """Parse field bitmap from start of data.
 
     Args:
@@ -82,7 +87,10 @@ def parse_field_bitmap(data: bytes, model_cls: Type['StructModel']) -> Tuple[byt
     # Special case: if first byte is 0 and no fields have values
     if bitmap_length == 0:
         # Check if all fields are optional and the model was empty
-        if all(is_optional_type(field.annotation) for field in model_cls.model_fields.values()):
+        if all(
+            is_optional_type(field.annotation)
+            for field in model_cls.model_fields.values()
+        ):
             return data[1:], []
         # Otherwise, include all fields
         return data[1:], list(model_cls.model_fields.keys())
@@ -90,12 +98,15 @@ def parse_field_bitmap(data: bytes, model_cls: Type['StructModel']) -> Tuple[byt
     if len(data) < bitmap_length + 1:
         raise StructUnpackError("Data too short for field bitmap")
 
-    bitmap = data[1:bitmap_length + 1]
-    remaining_data = data[bitmap_length + 1:]
+    bitmap = data[1 : bitmap_length + 1]
+    remaining_data = data[bitmap_length + 1 :]
 
     # Get all required fields
-    present_fields = [name for name, field in model_cls.model_fields.items()
-                      if not is_optional_type(field.annotation)]
+    present_fields = [
+        name
+        for name, field in model_cls.model_fields.items()
+        if not is_optional_type(field.annotation)
+    ]
 
     # Add present optional fields based on bitmap
     optional_fields = [
