@@ -1,6 +1,5 @@
 """tests/conftest.py PyTest test fixtures"""
 
-
 import pytest
 from typing import Optional
 from pydantic import Field

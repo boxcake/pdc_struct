@@ -1,6 +1,5 @@
 """Test BitFieldModel functionality."""
 
-
 from pdc_struct import (
     BitFieldModel,
     StructConfig,
