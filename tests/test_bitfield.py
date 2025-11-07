@@ -16,7 +16,6 @@ import importlib
 import sys
 
 
-
 def test_basic_boolean_bits():
     """Test basic boolean bit operations."""
 
