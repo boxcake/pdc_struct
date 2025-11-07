@@ -49,11 +49,7 @@ jobs:
 
     - name: Run basic import test
       run: |
-        python -c "
-from pdc_struct import StructModel, StructConfig, StructMode, ByteOrder
-from pdc_struct.c_types import UInt8, UInt16
-print('All imports successful!')
-"
+        python -c "from pdc_struct import StructModel, StructConfig, StructMode, ByteOrder; from pdc_struct.c_types import UInt8, UInt16; print('All imports successful!')"
 
     - name: Store the distribution packages
       uses: actions/upload-artifact@v4
