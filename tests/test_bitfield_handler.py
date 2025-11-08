@@ -106,7 +106,9 @@ def test_optional_bitfield_c_compatible_mode():
 
     class CPacket(StructModel):
         value: UInt16
-        flags: Optional[Flags] = Field(default_factory=lambda: Flags(), description="Optional flags")
+        flags: Optional[Flags] = Field(
+            default_factory=lambda: Flags(), description="Optional flags"
+        )
         struct_config = StructConfig(mode=StructMode.C_COMPATIBLE)
 
     # Test with flags present
@@ -148,7 +150,7 @@ def test_bitfield_struct_formats_all_widths():
         struct_config = StructConfig(mode=StructMode.C_COMPATIBLE)
 
     s8 = Struct8(flags=Flags8(value=3))
-    assert 'B' in s8.struct_format_string()
+    assert "B" in s8.struct_format_string()
     data8 = s8.to_bytes()
     assert len(data8) == 1
 
@@ -162,7 +164,7 @@ def test_bitfield_struct_formats_all_widths():
         struct_config = StructConfig(mode=StructMode.C_COMPATIBLE)
 
     s16 = Struct16(flags=Flags16(value=7))
-    assert 'H' in s16.struct_format_string()
+    assert "H" in s16.struct_format_string()
     data16 = s16.to_bytes()
     assert len(data16) == 2
 
@@ -176,7 +178,7 @@ def test_bitfield_struct_formats_all_widths():
         struct_config = StructConfig(mode=StructMode.C_COMPATIBLE)
 
     s32 = Struct32(flags=Flags32(value=15))
-    assert 'I' in s32.struct_format_string()
+    assert "I" in s32.struct_format_string()
     data32 = s32.to_bytes()
     assert len(data32) == 4
 
@@ -223,6 +225,7 @@ def test_validate_bitfield_construction_error():
 
     # Create a BitFieldModel with overlapping bits (should fail during construction)
     with pytest.raises(ValueError):
+
         class BrokenFlags(BitFieldModel):
             # These bits overlap, which should cause an error during validation
             field_a: int = Bit(0, 1, 2)
@@ -240,6 +243,7 @@ def test_validate_invalid_bit_width():
 
     # Try to create a BitFieldModel with an invalid bit width
     with pytest.raises(ValueError):
+
         class InvalidWidthFlags(BitFieldModel):
             flag: bool = Bit(0)
             struct_config = StructConfig(bit_width=24)  # Invalid: must be 8, 16, or 32
@@ -252,6 +256,7 @@ def test_bitfield_exceeds_bit_width():
     """
 
     with pytest.raises(ValueError):
+
         class ExceedingFlags(BitFieldModel):
             # Bit 8 is out of range for an 8-bit field
             flag: bool = Bit(8)
@@ -280,19 +285,15 @@ def test_bitfield_roundtrip_in_struct():
         flags: ProtocolFlags
         sequence: UInt16
         struct_config = StructConfig(
-            mode=StructMode.C_COMPATIBLE,
-            byte_order=ByteOrder.LITTLE_ENDIAN
+            mode=StructMode.C_COMPATIBLE, byte_order=ByteOrder.LITTLE_ENDIAN
         )
 
     # Create a header with specific flag values
     original = ProtocolHeader(
         flags=ProtocolFlags(
-            version=5,
-            encrypted=True,
-            compressed=False,
-            ack_required=True
+            version=5, encrypted=True, compressed=False, ack_required=True
         ),
-        sequence=12345
+        sequence=12345,
     )
 
     # Pack to bytes
@@ -334,9 +335,7 @@ def test_multiple_bitfields_in_struct():
 
     # Create and test
     obj = MultiFlags(
-        flags1=Flags1(a=True, b=False),
-        value=42,
-        flags2=Flags2(x=False, y=True, z=True)
+        flags1=Flags1(a=True, b=False), value=42, flags2=Flags2(x=False, y=True, z=True)
     )
 
     data = obj.to_bytes()
