@@ -36,6 +36,95 @@ Choose C_COMPATIBLE mode when working with:
 - **C/C++ interoperability** (shared memory, system calls)
 - **Embedded systems** (fixed-size data structures)
 
+### C Struct Padding Requirement
+
+!!! warning "Important: C Interoperability Requires Packed Structs"
+    PDC Struct produces **tightly packed** binary data with no padding bytes between fields. By default, C compilers insert padding to align struct members to word boundaries for CPU performance.
+
+    **You must use `#pragma pack(1)` in your C code** to disable padding when exchanging data with PDC Struct:
+
+    ```c
+    // C code - REQUIRED for PDC Struct compatibility
+    #pragma pack(push, 1)
+    struct SensorData {
+        uint8_t  device_id;
+        uint32_t timestamp;   // No padding before this!
+        uint16_t temperature;
+    };
+    #pragma pack(pop)
+    ```
+
+    Without `#pragma pack(1)`, C would insert 3 padding bytes before `timestamp`, making the struct 12 bytes instead of 7.
+
+#### Why C Adds Padding
+
+C compilers align struct members to their "natural" boundaries for faster memory access:
+
+| Type | Size | Default Alignment |
+|------|------|-------------------|
+| `char`, `uint8_t` | 1 byte | 1-byte boundary |
+| `short`, `uint16_t` | 2 bytes | 2-byte boundary |
+| `int`, `uint32_t` | 4 bytes | 4-byte boundary |
+| `double`, `uint64_t` | 8 bytes | 8-byte boundary (or 4 on 32-bit) |
+
+This means a simple struct can have hidden padding:
+
+```c
+// Default C alignment - NOT compatible with PDC Struct
+struct Example {
+    uint8_t  a;      // offset 0, size 1
+    // 3 bytes padding (to align next field to 4-byte boundary)
+    uint32_t b;      // offset 4, size 4
+    uint8_t  c;      // offset 8, size 1
+    // 3 bytes padding (struct size rounds to largest alignment)
+};  // Total: 12 bytes
+
+// With #pragma pack(1) - compatible with PDC Struct
+#pragma pack(push, 1)
+struct Example {
+    uint8_t  a;      // offset 0, size 1
+    uint32_t b;      // offset 1, size 4
+    uint8_t  c;      // offset 5, size 1
+};  // Total: 6 bytes
+#pragma pack(pop)
+```
+
+#### Matching Python and C Definitions
+
+```python
+# Python
+from pdc_struct import StructModel, StructConfig, StructMode, ByteOrder
+from pdc_struct.c_types import UInt8, UInt32, UInt16
+
+class SensorData(StructModel):
+    device_id: UInt8
+    timestamp: UInt32
+    temperature: UInt16
+
+    struct_config = StructConfig(
+        mode=StructMode.C_COMPATIBLE,
+        byte_order=ByteOrder.LITTLE_ENDIAN
+    )
+
+print(SensorData.struct_size())  # 7 bytes
+```
+
+```c
+// C - must match Python's packed layout
+#pragma pack(push, 1)
+struct SensorData {
+    uint8_t  device_id;
+    uint32_t timestamp;
+    uint16_t temperature;
+};
+#pragma pack(pop)
+
+printf("Size: %zu\n", sizeof(struct SensorData));  // 7 bytes
+```
+
+!!! note "Future Enhancement"
+    Automatic struct alignment support is planned for a future release. See the [Roadmap](../roadmap.md) for details on the proposed `StructConfig(alignment=N)` feature.
+
 ### Example: Network Packet
 
 ```python
