@@ -41,7 +41,7 @@ jobs:
 
     environment:
       name: pypi
-      url: https://pypi.org/p/pdc_struct
+      url: https://pypi.org/p/pdc-struct
 
     permissions:
       id-token: write  # IMPORTANT: mandatory for trusted publishing
@@ -63,7 +63,7 @@ jobs:
 
     environment:
       name: testpypi
-      url: https://test.pypi.org/p/pdc_struct
+      url: https://test.pypi.org/p/pdc-struct
 
     permissions:
       id-token: write  # IMPORTANT: mandatory for trusted publishing

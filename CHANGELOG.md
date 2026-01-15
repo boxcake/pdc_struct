@@ -62,6 +62,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - **BREAKING**: Minimum Python version raised from 3.10 to 3.11 (required for StrEnum support)
+- **Package name:** Changed PyPI package name from `pdc_struct` to `pdc-struct` (import remains `import pdc_struct`)
 - Improved code quality and removed debug print statements
 - Enhanced .gitignore to explicitly exclude .pyc and .pyo files
 

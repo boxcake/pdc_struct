@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "pdc_struct"
+name = "pdc-struct"
 version = "1.0.0"
 authors = [
   { name="Jonathan Baker", email="jon@boxcake.net" },
