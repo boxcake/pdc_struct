@@ -35,13 +35,21 @@ dev = [
     "pytest-cov>=4.0",
     "black>=23.0",
     "ruff>=0.1.0",
+    "mkdocs-material>=9.0",
+    "mkdocstrings[python]>=0.24",
 ]
 test = [
     "pytest>=7.0",
     "pytest-cov>=4.0",
 ]
+docs = [
+    "mkdocs-material>=9.0",
+    "mkdocstrings[python]>=0.24",
+    "mkdocs-git-revision-date-localized-plugin>=1.2",
+]
 
 [project.urls]
 "Homepage" = "https://github.com/boxcake/pdc_struct"
+"Documentation" = "https://boxcake.github.io/pdc_struct"
 "Bug Tracker" = "https://github.com/boxcake/pdc_struct/issues"
 "Repository" = "https://github.com/boxcake/pdc_struct"

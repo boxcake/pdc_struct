@@ -1,0 +1,3 @@
+# Exceptions
+
+*Documentation coming soon*

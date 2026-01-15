@@ -1,0 +1,3 @@
+# Modes
+
+*Documentation coming soon*
