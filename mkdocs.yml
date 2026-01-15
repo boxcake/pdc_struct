@@ -87,7 +87,6 @@ nav:
   - Getting Started:
     - Installation: installation.md
     - Quick Start: getting-started.md
-    - Your First Struct: first-struct.md
   - User Guide:
     - Operating Modes: user-guide/modes.md
     - Type System: user-guide/types.md
@@ -95,7 +94,6 @@ nav:
     - Nested Structures: user-guide/nested-structs.md
     - Optional Fields: user-guide/optional-fields.md
     - Byte Order: user-guide/byte-order.md
-    - Advanced Topics: user-guide/advanced.md
   - Examples:
     - ARP Packet Decoder: examples/arp-packet.md
     - C Interoperability: examples/c-interop.md
