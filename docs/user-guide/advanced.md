@@ -1,3 +1,0 @@
-# Advanced
-
-*Documentation coming soon*
