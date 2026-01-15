@@ -53,9 +53,6 @@ class StringHandler(TypeHandler):
         # Encode string and remove any embedded null bytes
         encoded = value.encode("utf-8")
         cleaned = encoded.split(b"\0", 1)[0]
-        print(
-            f"Packing string: '{value}' -> cleaned bytes: {[hex(b) for b in cleaned]}"
-        )
 
         # In DYNAMIC mode, just return the encoded string
         if not struct_config or struct_config.mode != StructMode.C_COMPATIBLE:
@@ -63,27 +60,20 @@ class StringHandler(TypeHandler):
 
         # In C_COMPATIBLE mode, handle fixed length and null termination
         length = cls._get_field_length_generic(field)
-        print(f"C_COMPATIBLE mode, length={length}")
 
         if length is None:
             raise ValueError("C_COMPATIBLE mode requires max_length or struct_length")
 
         # Take maximum string length that will fit with null terminator
         max_str_length = length - 1  # Reserve one byte for null terminator
-        print(f"Max string length: {max_str_length}")
         truncated = cleaned[:max_str_length]
-        print(f"Taking bytes: {[hex(b) for b in truncated]} (length: {len(truncated)})")
 
         # Add null terminator
         result = truncated + b"\0"
-        print(
-            f"After null terminator: {[hex(b) for b in result]} (length: {len(result)})"
-        )
 
         # Add any remaining padding if needed
         if len(result) < length:
             result = result + b"\0" * (length - len(result))
-        print(f"Final result: {[hex(b) for b in result]} (length: {len(result)})")
 
         return result
 

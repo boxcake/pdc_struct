@@ -1,0 +1,3 @@
+# Types
+
+*Documentation coming soon*

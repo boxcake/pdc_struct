@@ -1,0 +1,3 @@
+# Enums
+
+*Documentation coming soon*

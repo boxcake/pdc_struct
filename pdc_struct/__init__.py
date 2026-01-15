@@ -8,9 +8,9 @@ using Pydantic models and various helpers like enums and custom exceptions.
 from importlib.metadata import version, PackageNotFoundError
 
 # Define the library version
-DEFAULT_VERSION = "0.1.0"
+DEFAULT_VERSION = "1.0.0"
 try:
-    __version__ = version("pdc_struct")
+    __version__ = version("pdc-struct")
 except PackageNotFoundError:
     __version__ = DEFAULT_VERSION
 

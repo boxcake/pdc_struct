@@ -1,0 +1,126 @@
+site_name: PDC Struct
+site_description: A Pydantic extension for binary serialization and C-compatible struct packing
+site_author: Jonathan Baker
+site_url: https://boxcake.github.io/pdc_struct
+repo_name: boxcake/pdc_struct
+repo_url: https://github.com/boxcake/pdc_struct
+edit_uri: edit/main/docs/
+
+theme:
+  name: material
+  palette:
+    # Light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    # Dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - content.code.annotate
+    - toc.follow
+
+  icon:
+    repo: fontawesome/brands/github
+
+plugins:
+  - search
+  - git-revision-date-localized:
+      enable_creation_date: true
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            docstring_style: google
+            show_source: true
+            show_root_heading: true
+            show_root_full_path: false
+            show_symbol_type_heading: true
+            show_symbol_type_toc: true
+            members_order: source
+            group_by_category: true
+            show_if_no_docstring: false
+            annotations_path: brief
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
+  - pymdownx.details
+  - pymdownx.tabbed:
+      alternate_style: true
+  - admonition
+  - tables
+  - attr_list
+  - md_in_html
+  - toc:
+      permalink: true
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+
+nav:
+  - Home: index.md
+  - Getting Started:
+    - Installation: installation.md
+    - Quick Start: getting-started.md
+    - Your First Struct: first-struct.md
+  - User Guide:
+    - Operating Modes: user-guide/modes.md
+    - Type System: user-guide/types.md
+    - BitFields: user-guide/bitfields.md
+    - Nested Structures: user-guide/nested-structs.md
+    - Optional Fields: user-guide/optional-fields.md
+    - Byte Order: user-guide/byte-order.md
+    - Advanced Topics: user-guide/advanced.md
+  - Examples:
+    - ARP Packet Decoder: examples/arp-packet.md
+    - C Interoperability: examples/c-interop.md
+    - Network Protocols: examples/network-protocols.md
+    - IoT Devices: examples/iot-devices.md
+  - API Reference:
+    - StructModel: api-reference/struct-model.md
+    - StructConfig: api-reference/struct-config.md
+    - BitFieldModel: api-reference/bitfield-model.md
+    - Type System: api-reference/types.md
+    - Enums: api-reference/enums.md
+    - Exceptions: api-reference/exceptions.md
+  - Development:
+    - Contributing: contributing.md
+    - Roadmap: roadmap.md
+    - Changelog: changelog.md
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/boxcake/pdc_struct
+    - icon: fontawesome/brands/python
+      link: https://pypi.org/project/pdc-struct/
+
+  version:
+    provider: mike
+
+copyright: Copyright &copy; 2025 Jonathan Baker

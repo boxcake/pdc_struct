@@ -48,17 +48,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [Unreleased]
+## [1.0.0] - 2025-01-15
 
 ### Added
-- PyPI packaging configuration
+- Comprehensive BitFieldHandler tests (91% code coverage achieved)
+- PyPI packaging configuration with automated publishing workflow
 - Development dependencies (pytest, pytest-cov, black, ruff)
 - Enhanced PyPI classifiers and keywords
 - CONTRIBUTING.md guidelines
-- This CHANGELOG
+- ROADMAP.md for future development planning
+- Codecov integration for test coverage tracking
+- Automated test workflows for Python 3.11, 3.12, and 3.13
 
 ### Changed
 - **BREAKING**: Minimum Python version raised from 3.10 to 3.11 (required for StrEnum support)
+- **Package name:** Changed PyPI package name from `pdc_struct` to `pdc-struct` (import remains `import pdc_struct`)
+- Improved code quality and removed debug print statements
+- Enhanced .gitignore to explicitly exclude .pyc and .pyo files
 
+### Fixed
+- YAML syntax errors in GitHub Actions workflows
+- Codecov action updated to v5 with proper authentication
+- Black formatting applied consistently across all files
+- Removed binary .pyc files from git history
+
+---
+
+## [Unreleased]
+
+### Added
+- TBD
+
+[1.0.0]: https://github.com/boxcake/pdc_struct/releases/tag/v1.0.0
 [0.1.0]: https://github.com/boxcake/pdc_struct/releases/tag/v0.1.0
-[Unreleased]: https://github.com/boxcake/pdc_struct/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/boxcake/pdc_struct/compare/v1.0.0...HEAD
