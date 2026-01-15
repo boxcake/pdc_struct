@@ -94,7 +94,6 @@ class TypeHandler(ABC, metaclass=TypeHandlerMeta):
         Base implementation just checks if value is instance of any handled type.
         Override in handlers that accept additional compatible types.
         """
-        print(f"Is valid Value?\n Is type {type(value)} in {cls.handled_types()}")
         return any(isinstance(value, t) for t in cls.handled_types())
 
     @classmethod
@@ -162,13 +161,9 @@ class TypeHandler(ABC, metaclass=TypeHandlerMeta):
 
     @staticmethod
     def _get_field_length_generic(field) -> Optional[int]:
-        print(f"Getting field length. json_schema_extra: {field.json_schema_extra}")
-        print(f"Field metadata: {field.metadata}")
-
         struct_length = None
         if field.json_schema_extra:
             struct_length = field.json_schema_extra.get("struct_length")
-        print(f"Found struct_length: {struct_length}")
 
         if struct_length:
             return struct_length
@@ -179,6 +174,5 @@ class TypeHandler(ABC, metaclass=TypeHandlerMeta):
                 if hasattr(constraint, "max_length"):
                     max_length = constraint.max_length
                     break
-        print(f"Found max_length: {max_length}")
 
         return max_length
