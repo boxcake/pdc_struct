@@ -90,7 +90,7 @@ class StructModel(BaseModel):
             except ValueError as e:
                 raise ValueError(f"Field '{field_name}': {e}")
 
-    def clone(self, **field_updates) -> "StructModel":
+    def clone(self, **field_updates: Any) -> "StructModel":
         """Create a new instance with the same field values, optionally overriding specific fields.
 
         This method creates a copy of the current instance through serialization/deserialization,

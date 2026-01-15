@@ -1,7 +1,7 @@
 """BitField implementation for PDC Struct."""
 
 from sys import byteorder as system_byte_order
-from typing import Dict, Set, ClassVar, Literal
+from typing import Any, Dict, Set, ClassVar, Literal
 from dataclasses import dataclass
 from pydantic import BaseModel, Field
 from pydantic.fields import FieldInfo
@@ -29,7 +29,7 @@ class BitDefinition:
         return (1 << self.num_bits) - 1
 
 
-def Bit(start_bit: int, *additional_bits: int, **kwargs) -> FieldInfo:  # noqa
+def Bit(start_bit: int, *additional_bits: int, **kwargs: Any) -> FieldInfo:  # noqa
     """Define a bit field within a BitFieldModel.
 
     Creates a Pydantic Field with bit position metadata. Use this to map model attributes
@@ -284,7 +284,7 @@ class BitFieldModel(BaseModel):
 
             self.__pydantic_validator__.validate_assignment(self, name, value_to_set)
 
-    def clone(self, **field_updates) -> "BitFieldModel":
+    def clone(self, **field_updates: Any) -> "BitFieldModel":
         """Create a new instance with the same packed value but optionally override specific fields.
 
         Args:
