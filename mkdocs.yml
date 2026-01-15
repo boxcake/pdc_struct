@@ -97,7 +97,6 @@ nav:
   - Examples:
     - ARP Packet Decoder: examples/arp-packet.md
     - C Interoperability: examples/c-interop.md
-    - Network Protocols: examples/network-protocols.md
     - IoT Devices: examples/iot-devices.md
   - API Reference:
     - StructModel: api-reference/struct-model.md
