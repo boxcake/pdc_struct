@@ -77,7 +77,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- TBD
+- Comprehensive API reference documentation with mkdocstrings auto-generation
+- Expanded docstrings with usage examples for all public classes and methods:
+  - `StructModel`: `to_bytes()`, `from_bytes()`, `clone()` with round-trip examples
+  - `StructConfig`: Full parameter documentation with Args section
+  - `BitFieldModel`: `Bit()` function and `packed_value` property examples
+  - `ByteOrder` and `HeaderFlags` enums with format details
+  - Fixed-width types (`Int8`, `UInt8`, `Int16`, `UInt16`) with usage examples
+- Contextual introductions in all API reference pages
 
 [1.0.0]: https://github.com/boxcake/pdc_struct/releases/tag/v1.0.0
 [0.1.0]: https://github.com/boxcake/pdc_struct/releases/tag/v0.1.0
