@@ -30,20 +30,34 @@ Enhancement suggestions are tracked as GitHub issues. When creating an enhanceme
 
 ### Pull Requests
 
-1. **Fork the repository** and create your branch from `main`
+We follow a structured branching workflow:
+
+- **Feature branches** → merge to `dev`
+- **dev** → merge to `main` for releases
+- **main** → production-ready code only
+
+**Pull Request Process:**
+
+1. **Fork the repository** and create your feature branch from `dev`
+   ```bash
+   git checkout dev
+   git checkout -b feature/your-feature-name
+   ```
 2. **Make your changes** following the code style guidelines
 3. **Add tests** for any new functionality
 4. **Ensure all tests pass** (`pytest`)
 5. **Update documentation** as needed
 6. **Update CHANGELOG.md** under the `[Unreleased]` section
-7. **Submit your pull request**
+7. **Submit your pull request** targeting the `dev` branch
+8. **Wait for CI checks** - all tests and linting must pass
+9. Once approved, your PR will be merged to `dev`
 
 ## Development Setup
 
 ### Prerequisites
 
-- Python 3.10 or higher
-- pip or poetry for package management
+- Python 3.11 or higher
+- pip for package management
 
 ### Setting Up Your Development Environment
 
@@ -155,15 +169,66 @@ Update documentation for StructConfig parameters
 
 (For maintainers)
 
-1. Update version in `pyproject.toml`
-2. Move unreleased changes in `CHANGELOG.md` to new version section
-3. Create a git tag: `git tag -a v0.x.x -m "Release v0.x.x"`
-4. Push tag: `git push origin v0.x.x`
-5. Build and publish to PyPI:
+Releases are automatically published to PyPI via GitHub Actions when a release is created.
+
+### Creating a Release
+
+1. **Ensure `dev` is ready for release**
+   - All features merged and tested
+   - CI passing on `dev` branch
+
+2. **Merge `dev` to `main`**
    ```bash
-   python -m build
-   twine upload dist/*
+   git checkout main
+   git merge dev
    ```
+
+3. **Update version and changelog**
+   - Update version in `pyproject.toml` and `pdc_struct/__init__.py`
+   - Move `[Unreleased]` changes in `CHANGELOG.md` to new version section with date
+   - Commit changes:
+     ```bash
+     git add pyproject.toml pdc_struct/__init__.py CHANGELOG.md
+     git commit -m "Release vX.Y.Z"
+     ```
+
+4. **Push to main**
+   ```bash
+   git push origin main
+   ```
+
+5. **Create GitHub Release**
+   - Go to: https://github.com/boxcake/pdc_struct/releases/new
+   - Tag: `vX.Y.Z` (e.g., `v1.0.0`)
+   - Target: `main` branch
+   - Title: `vX.Y.Z - Release Name`
+   - Description: Copy relevant section from CHANGELOG.md
+   - Click "Publish release"
+
+6. **Automated Publishing**
+   - GitHub Actions will automatically:
+     - Build the distribution packages
+     - Run final validation checks
+     - Publish to TestPyPI
+     - Publish to PyPI
+   - Monitor the workflow at: https://github.com/boxcake/pdc_struct/actions
+
+7. **Verify Publication**
+   - Check PyPI: https://pypi.org/project/pdc-struct/
+   - Test installation: `pip install pdc-struct`
+
+### Hotfix Process
+
+For urgent fixes to production:
+
+1. Create hotfix branch from `main`:
+   ```bash
+   git checkout -b hotfix/issue-description main
+   ```
+2. Make the fix and commit
+3. Create PR targeting `main`
+4. After merge, follow release process above
+5. Merge `main` back to `dev` to sync changes
 
 ## Testing Guidelines
 
