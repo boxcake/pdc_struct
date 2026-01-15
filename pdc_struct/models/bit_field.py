@@ -30,7 +30,46 @@ class BitDefinition:
 
 
 def Bit(start_bit: int, *additional_bits: int, **kwargs) -> FieldInfo:  # noqa
-    """Create a Field with bit information stored in json_schema_extra."""
+    """Define a bit field within a BitFieldModel.
+
+    Creates a Pydantic Field with bit position metadata. Use this to map model attributes
+    to specific bit positions within the packed integer representation.
+
+    Args:
+        start_bit: The starting bit position (0-indexed from LSB).
+        *additional_bits: Additional contiguous bit positions for multi-bit integer fields.
+            For single-bit boolean fields, omit this. For multi-bit fields, list all bit
+            positions (e.g., `Bit(0, 1, 2)` for a 3-bit field).
+        **kwargs: Additional arguments passed to Pydantic's Field(), such as `description`,
+            `default`, or `json_schema_extra`.
+
+    Returns:
+        A Pydantic FieldInfo configured for bit field usage.
+
+    Raises:
+        ValueError: If bit positions are not contiguous.
+
+    Example:
+        >>> from pdc_struct import BitFieldModel, Bit, StructConfig, StructMode
+        >>>
+        >>> class StatusByte(BitFieldModel):
+        ...     # Single-bit boolean fields
+        ...     enabled: bool = Bit(0)           # Bit 0
+        ...     ready: bool = Bit(1)             # Bit 1
+        ...     error: bool = Bit(7)             # Bit 7
+        ...
+        ...     # Multi-bit integer field (bits 2-4, values 0-7)
+        ...     priority: int = Bit(2, 3, 4)
+        ...
+        ...     struct_config = StructConfig(
+        ...         mode=StructMode.C_COMPATIBLE,
+        ...         bit_width=8
+        ...     )
+        >>>
+        >>> status = StatusByte(enabled=True, priority=5)
+        >>> status.packed_value  # Binary: 00010101
+        21
+    """
     # Calculate bit info
     num_bits = 1 + len(additional_bits)
     is_bool = num_bits == 1
@@ -173,7 +212,42 @@ class BitFieldModel(BaseModel):
 
     @property
     def packed_value(self) -> int:
-        """Calculate bit value from current attributes."""
+        """Get or set the packed integer representation of all bit fields.
+
+        When getting, combines all field values into a single integer by setting bits
+        according to each field's position and width.
+
+        When setting, unpacks the integer and updates all field values accordingly.
+
+        Returns:
+            The integer value with all bit fields packed according to their positions.
+
+        Raises:
+            ValueError: If a field value is out of range for its bit width.
+
+        Example:
+            >>> from pdc_struct import BitFieldModel, Bit, StructConfig, StructMode
+            >>>
+            >>> class Permissions(BitFieldModel):
+            ...     read: bool = Bit(0)
+            ...     write: bool = Bit(1)
+            ...     execute: bool = Bit(2)
+            ...
+            ...     struct_config = StructConfig(
+            ...         mode=StructMode.C_COMPATIBLE,
+            ...         bit_width=8
+            ...     )
+            >>>
+            >>> # Get packed value
+            >>> perms = Permissions(read=True, write=True, execute=False)
+            >>> perms.packed_value
+            3
+            >>>
+            >>> # Set packed value (updates all fields)
+            >>> perms.packed_value = 7  # All permissions enabled
+            >>> perms.read, perms.write, perms.execute
+            (True, True, True)
+        """
         value = 0
         for name, bit_def in self._bit_definitions.items():
             attr_value = getattr(self, name)

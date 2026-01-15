@@ -47,6 +47,10 @@ docs = [
     "mkdocstrings[python]>=0.24",
     "mkdocs-git-revision-date-localized-plugin>=1.2",
 ]
+security = [
+    "bandit>=1.7",
+    "pip-audit>=2.6",
+]
 
 [project.urls]
 "Homepage" = "https://github.com/boxcake/pdc_struct"
