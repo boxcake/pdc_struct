@@ -9,7 +9,7 @@ This document outlines planned improvements and breaking changes for future vers
 ### 1. Migrate from Deprecated Field Usage (Pydantic v3 Compatibility)
 
 **Status:** Required for Pydantic v3 compatibility
-**Target Version:** 0.2.0
+**Target Version:** 1.1.0
 **Breaking Change:** Yes (API change)
 
 #### Problem
@@ -111,14 +111,14 @@ class MaxLength(BaseMetadata):
 
 #### Migration Path
 
-**Phase 1 (v0.2.0):**
+**Phase 1 (v1.1.0):**
 1. Implement `Annotated` metadata classes
 2. Update internal code to support both old and new APIs
 3. Add deprecation warnings when using kwargs directly
 4. Update all documentation and examples to new API
 5. Provide migration guide
 
-**Phase 2 (v0.3.0):**
+**Phase 2 (v1.2.0):**
 1. Remove support for direct Field kwargs
 2. Require `Annotated` syntax for struct metadata
 3. Clean up internal compatibility code
@@ -145,10 +145,72 @@ class MaxLength(BaseMetadata):
 
 ## Medium Priority
 
-### 2. Improve Annotated Type Support
+### 2. C Struct Alignment / Padding Support
 
 **Status:** Enhancement
-**Target Version:** 0.2.0
+**Target Version:** 1.2.0
+
+#### Problem
+
+C compilers align struct members to natural boundaries for CPU performance. A `uint32_t` is aligned to a 4-byte boundary, a `double` to 8 bytes, etc. This means C structs often contain invisible padding bytes:
+
+```c
+// Default C alignment - 12 bytes total, not 6!
+struct Example {
+    uint8_t  a;      // offset 0
+    // 3 bytes padding
+    uint32_t b;      // offset 4
+    uint8_t  c;      // offset 8
+    // 3 bytes padding (struct size rounds up to alignment)
+};
+```
+
+Currently, pdc_struct produces tightly packed data with no padding, requiring C code to use `#pragma pack(1)` to interoperate.
+
+#### Proposed Solution
+
+Add an alignment mode to `StructConfig`:
+
+```python
+class StructConfig:
+    mode: Mode = Mode.C_COMPATIBLE
+    byte_order: ByteOrder = ByteOrder.NATIVE
+    alignment: int = 1  # 1 = packed, 4 = 32-bit, 8 = 64-bit
+
+class MyStruct(StructModel):
+    struct_config = StructConfig(alignment=4)  # Match 32-bit C alignment
+
+    a: UInt8
+    b: UInt32  # Automatically padded to 4-byte boundary
+    c: UInt8
+    # Automatic end padding
+```
+
+#### Alignment Rules
+
+For `alignment=N`, each field aligns to `min(sizeof(field), N)`:
+
+| Type | Size | Alignment (N=4) | Alignment (N=8) |
+|------|------|-----------------|-----------------|
+| Int8/UInt8 | 1 | 1 | 1 |
+| Int16/UInt16 | 2 | 2 | 2 |
+| Int32/UInt32 | 4 | 4 | 4 |
+| Int64/UInt64 | 8 | 4 | 8 |
+| Float32 | 4 | 4 | 4 |
+| Float64 | 8 | 4 | 8 |
+
+#### Implementation Notes
+
+- Add `alignment` parameter to `StructConfig`
+- Calculate padding before each field based on current offset
+- Add end padding so struct size is multiple of largest member alignment
+- Provide `struct_padding()` helper for explicit padding fields
+- Consider `Aligned[T, N]` annotation for per-field alignment override
+
+### 3. Improve Annotated Type Support
+
+**Status:** Enhancement
+**Target Version:** 1.1.0
 
 Currently, the codebase has some support for extracting types from `Annotated`, but it could be more comprehensive. With the migration to `Annotated` metadata, this becomes critical.
 
@@ -157,10 +219,10 @@ Currently, the codebase has some support for extracting types from `Annotated`, 
 - Support stacking multiple metadata annotations
 - Add validation that ensures conflicting metadata raises clear errors
 
-### 3. Enhanced BitField API
+### 4. Enhanced BitField API
 
 **Status:** Enhancement
-**Target Version:** 0.3.0
+**Target Version:** 1.2.0
 
 The current `Bit()` function could be reimagined with `Annotated`:
 
@@ -172,10 +234,10 @@ flags: int = Bit(width=8, default=0)
 flags: Annotated[int, BitWidth(8)] = 0
 ```
 
-### 4. Validator Integration
+### 5. Validator Integration
 
 **Status:** Enhancement
-**Target Version:** 0.3.0
+**Target Version:** 1.2.0
 
 Better integration with Pydantic's validators for struct-specific constraints:
 
@@ -195,10 +257,10 @@ Add automatic validators based on struct metadata:
 
 ## Low Priority
 
-### 5. Performance Optimizations
+### 6. Performance Optimizations
 
 **Status:** Nice to have
-**Target Version:** 0.4.0
+**Target Version:** 1.3.0
 
 **Opportunities:**
 - Cache struct format strings more aggressively
@@ -206,10 +268,10 @@ Add automatic validators based on struct metadata:
 - Consider using `struct.Struct` objects for repeated pack/unpack operations
 - Profile and optimize hot paths in serialization
 
-### 6. Extended Type Support
+### 7. Extended Type Support
 
 **Status:** Enhancement
-**Target Version:** 0.4.0
+**Target Version:** 1.3.0
 
 **Additional types to consider:**
 - `Decimal` for fixed-point arithmetic
@@ -217,10 +279,10 @@ Add automatic validators based on struct metadata:
 - Custom binary formats (e.g., compressed data)
 - Nested lists/arrays with fixed sizes
 
-### 7. Better Error Messages
+### 8. Better Error Messages
 
 **Status:** Enhancement
-**Target Version:** 0.3.0
+**Target Version:** 1.2.0
 
 Improve error messages to include:
 - Field name and type in pack/unpack errors
@@ -232,10 +294,10 @@ Improve error messages to include:
 
 ## Documentation Improvements
 
-### 8. Comprehensive Examples
+### 9. Comprehensive Examples
 
 **Status:** Ongoing
-**Target Version:** 0.2.0+
+**Target Version:** 1.1.0+
 
 **Needed:**
 - More real-world protocol examples (DNS, DHCP, etc.)
@@ -244,10 +306,10 @@ Improve error messages to include:
 - Binary file format parsing guide
 - Performance comparison vs alternatives
 
-### 9. API Reference Documentation
+### 10. API Reference Documentation
 
-**Status:** Needed
-**Target Version:** 0.2.0
+**Status:** Completed
+**Target Version:** 1.1.0
 
 **Generate proper API docs:**
 - Use Sphinx or MkDocs
@@ -259,7 +321,7 @@ Improve error messages to include:
 
 ## Testing Improvements
 
-### 10. Increased Test Coverage
+### 11. Increased Test Coverage
 
 **Current Coverage:** ~85-90% (estimated)
 **Target:** >95%
@@ -271,10 +333,10 @@ Improve error messages to include:
 - Unusual field configurations
 - Round-trip testing for all supported types
 
-### 11. Property-Based Testing
+### 12. Property-Based Testing
 
 **Status:** Enhancement
-**Target Version:** 0.3.0
+**Target Version:** 1.2.0
 
 Use Hypothesis for property-based testing:
 - Round-trip property: `from_bytes(x.to_bytes()) == x`
@@ -286,7 +348,7 @@ Use Hypothesis for property-based testing:
 
 ## Breaking Changes Summary
 
-### v0.2.0 (Next Major Release)
+### v1.1.0 (Next Minor Release)
 
 **Deprecations (with warnings):**
 - Direct Field kwargs (`struct_length`, etc.) deprecated
@@ -296,27 +358,27 @@ Use Hypothesis for property-based testing:
 - `Annotated` metadata classes
 - Migration guide published
 
-### v0.3.0
+### v1.2.0
 
 **Breaking Changes:**
 - Remove support for direct Field kwargs
 - Require `Annotated` for struct metadata
-- May require minor API adjustments based on 0.2.0 feedback
+- May require minor API adjustments based on v1.1.0 feedback
 
 ---
 
 ## Timeline
 
-- **v0.2.0** (Q1 2025): Pydantic v3 compatibility preparation
+- **v1.1.0** (Q1 2026): Pydantic v3 compatibility preparation
   - Add `Annotated` support
   - Deprecation warnings
   - Documentation updates
 
-- **v0.3.0** (Q2 2025): Remove deprecated APIs
+- **v1.2.0** (Q2 2026): Remove deprecated APIs
   - Breaking change: require new API
-  - Enhanced features based on v0.2.0 feedback
+  - Enhanced features based on v1.1.0 feedback
 
-- **v0.4.0** (Q3 2025+): Performance and features
+- **v1.3.0** (Q3 2026+): Performance and features
   - Optimizations
   - Extended type support
   - Stability improvements

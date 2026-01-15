@@ -16,12 +16,30 @@ PDC Struct combines **Pydantic's validation** with **Python's struct module** to
 
 ## Key Features
 
-- 🔄 **Two Operating Modes** for different use cases
-- 🛡️ **Type Safety** through Pydantic validation
-- 🌍 **Cross-Platform** with configurable byte order
-- 📦 **Rich Type Support** including custom types
-- 🔍 **Strong Validation** with clear error messages
-- 🧪 **Well-Tested** with 91% code coverage
+### Dual Operating Modes
+
+- **C_COMPATIBLE Mode**: Fixed-size binary layouts matching C struct specifications, ideal for network protocols, hardware interfaces, and legacy file formats
+- **DYNAMIC Mode**: Flexible, self-describing format with true optional field support and variable-size packing for Python-to-Python communication
+
+### Type Safety and Validation
+
+- **Pydantic Integration**: Full validation at creation time with clear error messages
+- **Fixed-Width Integer Types**: Explicit sizing with `Int8`, `UInt8`, `Int16`, `UInt16` prevents overflow errors
+- **Automatic Range Checking**: Values validated against type constraints before packing
+
+### Advanced Binary Features
+
+- **Configurable Byte Order**: Little-endian, big-endian, or native with automatic propagation to nested structures
+- **BitField Support**: Pack multiple boolean flags or small integers into single bytes for space efficiency
+- **Nested Structs**: Compose complex hierarchical structures with automatic size calculation
+- **Optional Fields**: Mode-dependent behavior - fixed defaults in C_COMPATIBLE, truly optional in DYNAMIC
+
+### Rich Type Ecosystem
+
+- **Network Types**: Native support for `IPv4Address` and `UUID`
+- **Enums**: Automatic integer conversion for `IntEnum` and standard `Enum` types
+- **Binary Data**: Fixed-length `bytes` and null-terminated `str` fields
+- **Custom Extensions**: Pluggable type handler system for adding new types
 
 ## Quick Example
 
@@ -94,11 +112,11 @@ class SensorReading(StructModel):
 
 | Feature | PDC Struct | Plain struct | Pydantic |
 |---------|-----------|--------------|----------|
-| Type Safety | ✅ | ❌ | ✅ |
-| Binary Packing | ✅ | ✅ | ❌ |
-| Validation | ✅ | ❌ | ✅ |
-| C Compatible | ✅ | ✅ | ❌ |
-| Modern API | ✅ | ❌ | ✅ |
+| Type Safety | Yes | No | Yes |
+| Binary Packing | Yes | Yes | No |
+| Validation | Yes | No | Yes |
+| C Compatible | Yes | Yes | No |
+| Modern API | Yes | No | Yes |
 
 ## Next Steps
 

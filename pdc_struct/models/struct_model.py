@@ -90,8 +90,12 @@ class StructModel(BaseModel):
             except ValueError as e:
                 raise ValueError(f"Field '{field_name}': {e}")
 
-    def clone(self, **field_updates) -> "StructModel":
-        """Create a new instance with the same packed value but optionally override specific fields.
+    def clone(self, **field_updates: Any) -> "StructModel":
+        """Create a new instance with the same field values, optionally overriding specific fields.
+
+        This method creates a copy of the current instance through serialization/deserialization,
+        then applies any provided field updates. Useful for creating variations of an existing
+        struct without modifying the original.
 
         Args:
             **field_updates: Field values to override in the new instance.
@@ -100,6 +104,24 @@ class StructModel(BaseModel):
         Returns:
             A new instance of the same class with the specified updates applied.
 
+        Example:
+            >>> from pdc_struct import StructModel, StructConfig, StructMode
+            >>>
+            >>> class Point(StructModel):
+            ...     x: float
+            ...     y: float
+            ...     z: float
+            ...
+            ...     struct_config = StructConfig(mode=StructMode.C_COMPATIBLE)
+            >>>
+            >>> origin = Point(x=0.0, y=0.0, z=0.0)
+            >>> # Create a new point with only z changed
+            >>> elevated = origin.clone(z=10.0)
+            >>> elevated.x, elevated.y, elevated.z
+            (0.0, 0.0, 10.0)
+            >>> # Original is unchanged
+            >>> origin.z
+            0.0
         """
         return self.__class__(packed_value=self.to_bytes(), **field_updates)
 
@@ -248,6 +270,10 @@ class StructModel(BaseModel):
     def to_bytes(self, override_endian: Optional[ByteOrder] = None) -> bytes:
         """Convert model instance to bytes using configured mode and version.
 
+        Serializes the model's field values into a binary representation suitable for
+        storage, network transmission, or C interoperability. The output format depends
+        on the configured mode (C_COMPATIBLE or DYNAMIC).
+
         Args:
             override_endian: Optional ByteOrder to override the struct_config's endianness.
                             Used primarily for nested structs to match parent endianness.
@@ -256,8 +282,29 @@ class StructModel(BaseModel):
             bytes: The packed binary data according to the configured mode.
 
         Raises:
-            ValueError: If mode or version is unsupported
-            StructPackError: If packing fails
+            ValueError: If mode or version is unsupported.
+            StructPackError: If packing fails due to invalid field values.
+
+        Example:
+            >>> from pdc_struct import StructModel, StructConfig, StructMode, ByteOrder
+            >>>
+            >>> class Point(StructModel):
+            ...     x: float
+            ...     y: float
+            ...
+            ...     struct_config = StructConfig(
+            ...         mode=StructMode.C_COMPATIBLE,
+            ...         byte_order=ByteOrder.LITTLE_ENDIAN
+            ...     )
+            >>>
+            >>> point = Point(x=1.0, y=2.0)
+            >>> data = point.to_bytes()
+            >>> len(data)
+            16
+            >>> # Restore the point from bytes
+            >>> restored = Point.from_bytes(data)
+            >>> restored.x, restored.y
+            (1.0, 2.0)
         """
         # Validate version - currently only V1 is supported
         if self.struct_config.version != StructVersion.V1:
@@ -390,17 +437,44 @@ class StructModel(BaseModel):
     ) -> T:
         """Create model instance from bytes using configured mode and version.
 
+        Deserializes binary data back into a validated model instance. The input format
+        must match the configured mode (C_COMPATIBLE or DYNAMIC). All field values are
+        validated through Pydantic after unpacking.
+
         Args:
-            data: The packed binary data to unpack
+            data: The packed binary data to unpack. Must be exactly the right size for
+                C_COMPATIBLE mode, or contain a valid header for DYNAMIC mode.
             override_endian: Optional ByteOrder to override the struct_config's endianness.
                             Used primarily for nested structs to match parent endianness.
 
         Returns:
-            An instance of the model class
+            An instance of the model class with fields populated from the binary data.
 
         Raises:
-            ValueError: If mode or version is unsupported
-            StructUnpackError: If unpacking fails
+            ValueError: If mode or version is unsupported.
+            StructUnpackError: If unpacking fails due to truncated data, invalid header,
+                or version mismatch.
+
+        Example:
+            >>> from pdc_struct import StructModel, StructConfig, StructMode, ByteOrder
+            >>> from pdc_struct.c_types import UInt8, UInt16
+            >>>
+            >>> class Sensor(StructModel):
+            ...     sensor_id: UInt8
+            ...     reading: UInt16
+            ...
+            ...     struct_config = StructConfig(
+            ...         mode=StructMode.C_COMPATIBLE,
+            ...         byte_order=ByteOrder.BIG_ENDIAN
+            ...     )
+            >>>
+            >>> # Parse binary data from a sensor device
+            >>> raw_data = b'\\x01\\x03\\xe8'  # sensor_id=1, reading=1000
+            >>> sensor = Sensor.from_bytes(raw_data)
+            >>> sensor.sensor_id
+            1
+            >>> sensor.reading
+            1000
         """
         # Validate version - currently only V1 is supported
         if cls.struct_config.version == StructVersion.V1:
