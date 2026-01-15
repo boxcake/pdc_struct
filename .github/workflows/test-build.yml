@@ -3,7 +3,12 @@ name: Test Build
 on:
   workflow_dispatch:  # Allows manual trigger
   push:
-    branches: [ main ]
+    branches: [ main, dev ]
+    paths:
+      - 'pyproject.toml'
+      - 'pdc_struct/**'
+  pull_request:
+    branches: [ main, dev ]
     paths:
       - 'pyproject.toml'
       - 'pdc_struct/**'
