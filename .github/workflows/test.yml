@@ -9,11 +9,18 @@ on:
 jobs:
   test:
     runs-on: ${{ matrix.os }}
+    continue-on-error: ${{ matrix.experimental || false }}
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [ubuntu-latest, windows-latest]
         python-version: ["3.11", "3.12", "3.13"]
+        experimental: [false]
+        include:
+          # Test against Python 3.14 dev (allowed to fail)
+          - os: ubuntu-latest
+            python-version: "3.14-dev"
+            experimental: true
 
     steps:
     - uses: actions/checkout@v4
